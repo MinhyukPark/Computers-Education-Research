@@ -13,6 +13,53 @@ const maxT = 1.0;
 const att = "Attendance";
 const gra = "QuizGrades";
 
+function beginner_callback(db, email_arr, table) {
+    db.close();
+    var beginnerTable = {}
+    // console.log('beginner results');
+    for (var email in email_arr) {
+        if(email_arr[email] in table) {
+            beginnerTable[email_arr[email]] = table[email_arr[email]];
+        }
+    }
+
+    var i;
+    for (i = minT; i <= maxT; i += 0.01) {
+        console.log(i);
+        console.log(getCorrelation(beginnerTable, i));
+    } 
+    process.exit(0);
+}
+
+
+function parseBeginnerResults(table) {
+    MongoClient.connect(url, {useNewUrlParser: true}, function(err, db) {
+        if (err) throw err;
+        // connection is made
+        var email_arr = []; 
+        const root_db = db.db('Spring2018');
+        var people = root_db.collection('people');
+        var beginnerCount = 0;
+
+        people.find({'survey.ap.summary':{$eq: 0}}).count(function (err, count) {
+            beginnerCount = count;
+            return;
+        });
+
+        var currentBeginnerCount = 0;
+    
+        people.find({'survey.ap.summary':{$eq: 0}}).forEach(function(people_doc) {
+            email_arr.push(people_doc.email)
+            currentBeginnerCount++;
+        }, function(err) {
+            if(currentBeginnerCount === beginnerCount) {
+                beginner_callback(db, email_arr, table);
+            } else if(err) throw err;
+        });
+        
+    });
+}
+
 function getCorrelation(table, T) {
     student_attendance = []
     student_grades = []
@@ -59,10 +106,11 @@ function getCorrelation(table, T) {
 function parseResults(table) {
     var i;
     for (i = minT; i <= maxT; i += 0.01) {
-        console.log(i);
-        console.log(getCorrelation(table, i));
+        // MARK: PARSE RESULTS ALL
+        //console.log(i);
+        //console.log(getCorrelation(table, i));
     } 
-    process.exit();
+    parseBeginnerResults(table);
 }
 
 function callback(db, table) {
@@ -87,7 +135,7 @@ MongoClient.connect(url, {useNewUrlParser: true}, function(err, db) {
         return;
     });
 
-    quizGrades.find({type: {$eq: 'quiz'}}).count(function (err, count) {
+    quizGrades.find({name: {$in: ['Q10', 'Q11', 'Q12']}}).count(function (err, count) {
         quizGradeCount = count;
         return;
     });
@@ -110,7 +158,7 @@ MongoClient.connect(url, {useNewUrlParser: true}, function(err, db) {
         } else if(err) throw err;
     });
     
-    quizGrades.find({type: {$eq: 'quiz'}}).forEach(function(grade_doc) {
+    quizGrades.find({name: {$in: ['Q10', 'Q11', 'Q12']}}).forEach(function(grade_doc) {
         if (!(grade_doc.email in table)) {
             table[grade_doc.email] = {}; 
             table[grade_doc.email][att] = [];
@@ -127,5 +175,6 @@ MongoClient.connect(url, {useNewUrlParser: true}, function(err, db) {
 });
     // close connection
 //});
+
 
 
