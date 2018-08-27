@@ -135,7 +135,7 @@ MongoClient.connect(url, {useNewUrlParser: true}, function(err, db) {
         return;
     });
 
-    quizGrades.find({name: {$in: ['Q10', 'Q11', 'Q12']}}).count(function (err, count) {
+    quizGrades.find({name: {$in: ['Q6', 'Q7', 'Q8', 'Q9', 'Q10', 'Q11', 'Q12']}}).count(function (err, count) {
         quizGradeCount = count;
         return;
     });
@@ -158,7 +158,7 @@ MongoClient.connect(url, {useNewUrlParser: true}, function(err, db) {
         } else if(err) throw err;
     });
     
-    quizGrades.find({name: {$in: ['Q10', 'Q11', 'Q12']}}).forEach(function(grade_doc) {
+    quizGrades.find({name: {$in: ['Q6', 'Q7', 'Q8', 'Q9', 'Q10', 'Q11', 'Q12']}}).forEach(function(grade_doc) {
         if (!(grade_doc.email in table)) {
             table[grade_doc.email] = {}; 
             table[grade_doc.email][att] = [];
