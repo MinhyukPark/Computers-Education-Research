@@ -63,11 +63,13 @@ function parseBeginnerResults(table) {
 function getCorrelation(table, T) {
     student_attendance = []
     student_grades = []
+    student_emails = []
     var temp_cur = 0;
     var count = 0;
     for (var student in table) {
         temp_cur = 0;
         count = 0;
+        student_emails.push(student);
         var totalAttendance = 0;
         for (var attendance in table[student][att]) {
             if(table[student][att][attendance] >= T) {
@@ -82,10 +84,13 @@ function getCorrelation(table, T) {
             temp_cur = Math.floor(100 * (totalAttendance * 1.0 / count));
         }
         
+    }
+
+    for (var email in student_emails) {
         count = 0; 
         var totalGrade = 0;
-        for (var grade in table[student][gra]) {
-            totalGrade += parseInt(table[student][gra][grade]);
+        for (var grade in table[student_emails[email]][gra]) {
+            totalGrade += parseInt(table[student_emails[email]][gra][grade]);
             count += 100;
         } 
         if(isNaN(totalGrade * 1.0 / count)) {
@@ -135,7 +140,7 @@ MongoClient.connect(url, {useNewUrlParser: true}, function(err, db) {
         return;
     });
 
-    quizGrades.find({name: {$in: ['Q6', 'Q7', 'Q8', 'Q9', 'Q10', 'Q11', 'Q12']}}).count(function (err, count) {
+    quizGrades.find({name: {$in: ['Q9', 'Q10', 'Q11', 'Q12']}}).count(function (err, count) {
         quizGradeCount = count;
         return;
     });
@@ -158,7 +163,7 @@ MongoClient.connect(url, {useNewUrlParser: true}, function(err, db) {
         } else if(err) throw err;
     });
     
-    quizGrades.find({name: {$in: ['Q6', 'Q7', 'Q8', 'Q9', 'Q10', 'Q11', 'Q12']}}).forEach(function(grade_doc) {
+    quizGrades.find({name: {$in: ['Q9', 'Q10', 'Q11', 'Q12']}}).forEach(function(grade_doc) {
         if (!(grade_doc.email in table)) {
             table[grade_doc.email] = {}; 
             table[grade_doc.email][att] = [];
