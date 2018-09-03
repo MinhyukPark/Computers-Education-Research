@@ -1,4 +1,10 @@
 # CS125-Node-Mongo
+## Dependencies
+[dotenv](https://github.com/motdotla/dotenv) - used for storing sensitive data as node environment variables
+
+[node-correlation](https://github.com/drodrigues/node-correlation) - used for getting the correlation of two lists
+
+[mongodb](https://github.com/mongodb/node-mongodb-native) - used for connecting to MongoDB
 
 ## Files
 attendance.py
