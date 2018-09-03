@@ -2,14 +2,17 @@
  * Finding correlation between class attendance and quiz grades
  */
 
-var MongoClient = require('mongodb').MongoClient;
+// https://github.com/motdotla/dotenv
+require('dotenv').config();
+// https://github.com/drodrigues/node-correlation
 var Correlation = require('node-correlation');
+// https://github.com/mongodb/node-mongodb-native
+var MongoClient = require('mongodb').MongoClient;
 
-var url = ***REMOVED***
-
+// const
+const DB_URI = process.env.DB_URI;
 const minT = 0.0;
 const maxT = 1.0;
-
 const att = "Attendance";
 const gra = "QuizGrades";
 
@@ -33,7 +36,7 @@ function beginner_callback(db, email_arr, table) {
 
 
 function parseBeginnerResults(table) {
-    MongoClient.connect(url, {useNewUrlParser: true}, function(err, db) {
+    MongoClient.connect(DB_URI, {useNewUrlParser: true}, function(err, db) {
         if (err) throw err;
         // connection is made
         var email_arr = []; 
@@ -118,13 +121,16 @@ function parseResults(table) {
     parseBeginnerResults(table);
 }
 
+
 function callback(db, table) {
     db.close();
     // console.log(table);
     parseResults(table);
 }
 
-MongoClient.connect(url, {useNewUrlParser: true}, function(err, db) {
+
+
+MongoClient.connect(DB_URI, {useNewUrlParser: true}, function(err, db) {
     if (err) throw err;
     // connection is made
     var table = {}; 
@@ -139,7 +145,7 @@ MongoClient.connect(url, {useNewUrlParser: true}, function(err, db) {
         attendanceCount = count;
         return;
     });
-
+    // MARK: query
     quizGrades.find({name: {$in: ['Q9', 'Q10', 'Q11', 'Q12']}}).count(function (err, count) {
         quizGradeCount = count;
         return;
@@ -163,6 +169,7 @@ MongoClient.connect(url, {useNewUrlParser: true}, function(err, db) {
         } else if(err) throw err;
     });
     
+    // MARK: query 
     quizGrades.find({name: {$in: ['Q9', 'Q10', 'Q11', 'Q12']}}).forEach(function(grade_doc) {
         if (!(grade_doc.email in table)) {
             table[grade_doc.email] = {}; 
