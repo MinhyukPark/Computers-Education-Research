@@ -146,7 +146,7 @@ MongoClient.connect(DB_URI, {useNewUrlParser: true}, function(err, db) {
         return;
     });
     // MARK: query
-    quizGrades.find({name: {$in: ['Q9', 'Q10', 'Q11', 'Q12']}}).count(function (err, count) {
+    quizGrades.find({name: {$in: ['E0']}}).count(function (err, count) {
         quizGradeCount = count;
         return;
     });
@@ -159,7 +159,7 @@ MongoClient.connect(DB_URI, {useNewUrlParser: true}, function(err, db) {
         if (!(attendance_doc.email in table)) {
             table[attendance_doc.email] = {}; 
             table[attendance_doc.email][att] = [];
-            table[attendance_doc.email][gra] = [];
+            table[attendance_doc.email][gra] = [0, 0, 0, 0];
         }
         table[attendance_doc.email][att].push(attendance_doc.percentage);
         currentAttendanceCount++;
@@ -170,13 +170,28 @@ MongoClient.connect(DB_URI, {useNewUrlParser: true}, function(err, db) {
     });
     
     // MARK: query 
-    quizGrades.find({name: {$in: ['Q9', 'Q10', 'Q11', 'Q12']}}).forEach(function(grade_doc) {
+    quizGrades.find({name: {$in: ['E0']}}).forEach(function(grade_doc) {
         if (!(grade_doc.email in table)) {
             table[grade_doc.email] = {}; 
             table[grade_doc.email][att] = [];
-            table[grade_doc.email][gra] = [];
+            table[grade_doc.email][gra] = [0, 0, 0, 0];
         }
-        table[grade_doc.email][gra].push(grade_doc.score);
+        var gra_index = -1;
+        if(grade_doc.name === 'Q9') {
+            gra_index = 0; 
+        } else if (grade_doc.name === 'Q10') {
+            gra_index = 1; 
+        } else if (grade_doc.name === 'Q11') { 
+            gra_index = 2; 
+        } else if (grade_doc.name === 'Q12') {
+            gra_index = 3; 
+        } else if (grade_doc.name === 'E0') {
+            table[grade_doc.email][gra] = [grade_doc.score];
+        }
+        
+        if(gra_index != -1 && table[grade_doc.email][gra][gra_index] < grade_doc.score) {
+            table[grade_doc.email][gra].push(grade_doc.score);
+        }
         currentGradeCount++;
     }, function(err) {
         if(currentGradeCount + currentAttendanceCount === quizGradeCount + attendanceCount) {
