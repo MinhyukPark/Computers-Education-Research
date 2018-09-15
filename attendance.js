@@ -1,13 +1,19 @@
 /**
- * Finding correlation between class attendance and quiz grades
+ * Finding any kind of significance between class attendance and 
+ * other class metric
  */
 
 // https://github.com/motdotla/dotenv
 require('dotenv').config();
+
 // https://github.com/drodrigues/node-correlation
 var Correlation = require('node-correlation');
+
 // https://github.com/mongodb/node-mongodb-native
 var MongoClient = require('mongodb').MongoClient;
+
+// https://github.com/simple-statistics/simple-statistics
+var ss = require('simple-statistics').config();
 
 // const
 const DB_URI = process.env.DB_URI;
@@ -29,7 +35,7 @@ function beginner_callback(db, email_arr, table) {
     var i;
     for (i = minT; i <= maxT; i += 0.01) {
         console.log(i);
-        console.log(getCorrelation(beginnerTable, i));
+        console.log(applyThreshold(beginnerTable, i));
     } 
     process.exit(0);
 }
@@ -63,7 +69,7 @@ function parseBeginnerResults(table) {
     });
 }
 
-function getCorrelation(table, T) {
+function applyThreshold(table, T) {
     student_attendance = []
     student_grades = []
     student_emails = []
@@ -108,6 +114,16 @@ function getCorrelation(table, T) {
     //console.log(student_attendance);
     // console.log(student_grades);
     //
+    // return getCorrelation(student_attendance, student_grades);
+    return getChiSquared(student_attendance, student_grades);
+}
+
+function getChiSquared(student_attendance, student_grades) {
+    console.log(student_attendance);
+    console.log(student_grades); 
+}
+
+function getCorrelation(student_attendance, student_grades) {
     return Correlation.calc(student_attendance, student_grades);
 }
 
@@ -116,7 +132,7 @@ function parseResults(table) {
     for (i = minT; i <= maxT; i += 0.01) {
         // MARK: PARSE RESULTS ALL
         //console.log(i);
-        //console.log(getCorrelation(table, i));
+        //console.log(applyThreshold(table, i));
     } 
     parseBeginnerResults(table);
 }
