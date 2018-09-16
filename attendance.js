@@ -1,6 +1,7 @@
 /**
  * Finding any kind of significance between class attendance and 
  * other class metric
+ * - currently using mainly spearman-rho correlation
  */
 
 // https://github.com/motdotla/dotenv
