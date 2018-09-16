@@ -18,7 +18,7 @@ var MongoClient = require('mongodb').MongoClient;
 // https://github.com/simple-statistics/simple-statistics
 var ss = require('simple-statistics')
 
-// const
+// constants
 const DB_URI = process.env.DB_URI;
 const minT = 0.0;
 const maxT = 1.0;
