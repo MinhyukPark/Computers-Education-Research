@@ -9,11 +9,14 @@ require('dotenv').config();
 // https://github.com/drodrigues/node-correlation
 var Correlation = require('node-correlation');
 
+// https://github.com/ericrange/spearman-rho
+var SpearmanRHO = require('spearman-rho');
+
 // https://github.com/mongodb/node-mongodb-native
 var MongoClient = require('mongodb').MongoClient;
 
 // https://github.com/simple-statistics/simple-statistics
-var ss = require('simple-statistics').config();
+var ss = require('simple-statistics')
 
 // const
 const DB_URI = process.env.DB_URI;
@@ -34,10 +37,9 @@ function beginner_callback(db, email_arr, table) {
 
     var i;
     for (i = minT; i <= maxT; i += 0.01) {
-        console.log(i);
-        console.log(applyThreshold(beginnerTable, i));
+        applyThreshold(beginnerTable, i);
     } 
-    process.exit(0);
+    // process.exit(0);
 }
 
 
@@ -114,17 +116,30 @@ function applyThreshold(table, T) {
     //console.log(student_attendance);
     // console.log(student_grades);
     //
-    // return getCorrelation(student_attendance, student_grades);
-    return getChiSquared(student_attendance, student_grades);
+    getCorrelation(student_attendance, student_grades, T);
+    // return getSignificance(student_attendance, student_grades);
 }
 
-function getChiSquared(student_attendance, student_grades) {
+function getSignificance(student_attendance, student_grades) {
     console.log(student_attendance);
     console.log(student_grades); 
 }
 
-function getCorrelation(student_attendance, student_grades) {
-    return Correlation.calc(student_attendance, student_grades);
+function getCorrelationCallback(value, T) {
+    console.log(T);
+    console.log(value);
+}
+
+
+function getCorrelation(student_attendance, student_grades, T) {
+    // return Correlation.calc(student_attendance, student_grades);
+    var spearmanRHO = new SpearmanRHO(student_attendance, student_grades);
+    spearmanRHO.calc().then(function(value) {
+        getCorrelationCallback(value, T);
+    });
+    //.then(function(value) {
+    //    return value;
+    //});
 }
 
 function parseResults(table) {
@@ -162,7 +177,7 @@ MongoClient.connect(DB_URI, {useNewUrlParser: true}, function(err, db) {
         return;
     });
     // MARK: query
-    quizGrades.find({name: {$in: ['E0']}}).count(function (err, count) {
+    quizGrades.find({name: {$in: ['Q9', 'Q10', 'Q11', 'Q12']}}).count(function (err, count) {
         quizGradeCount = count;
         return;
     });
@@ -186,7 +201,7 @@ MongoClient.connect(DB_URI, {useNewUrlParser: true}, function(err, db) {
     });
     
     // MARK: query 
-    quizGrades.find({name: {$in: ['E0']}}).forEach(function(grade_doc) {
+    quizGrades.find({name: {$in: ['Q9', 'Q10', 'Q11', 'Q12']}}).forEach(function(grade_doc) {
         if (!(grade_doc.email in table)) {
             table[grade_doc.email] = {}; 
             table[grade_doc.email][att] = [];
