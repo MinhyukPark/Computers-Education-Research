@@ -117,8 +117,28 @@ function applyThreshold(table, T) {
     //console.log(student_attendance);
     // console.log(student_grades);
     //
-    getCorrelation(student_attendance, student_grades, T);
+    // getCorrelation(student_attendance, student_grades, T);
+    twoSampleTTest(student_attendance, student_grades, T, table);
     // return getSignificance(student_attendance, student_grades);
+}
+
+function twoSampleTTest(student_attendance, student_grades, T, table) {
+    sampleX = []
+    sampleY = []
+    var hypotheticalDifference = 0
+    
+    for (var i in student_grades) {
+        if(student_attendance[i] != 0 && student_grades[i] != 0 && student_grades[i] > 80) {
+            sampleX.push(student_attendance[i]);
+        } else {
+            sampleY.push(student_attendance[i]);
+        }
+    }
+
+    // console.log(sampleX);
+    // console.log(sampleY);
+
+    console.log(ss.tTestTwoSample(sampleX, sampleY, hypotheticalDifference)); 
 }
 
 function getSignificance(student_attendance, student_grades) {
@@ -143,14 +163,17 @@ function getCorrelation(student_attendance, student_grades, T) {
     //});
 }
 
+function tSampleTest(table) {
+}
+
 function parseResults(table) {
     var i;
     for (i = minT; i <= maxT; i += 0.01) {
         // MARK: PARSE RESULTS ALL
-        //console.log(i);
-        //console.log(applyThreshold(table, i));
+        console.log(i);
+        applyThreshold(table, i);
     } 
-    parseBeginnerResults(table);
+    // parseBeginnerResults(table);
 }
 
 
@@ -162,6 +185,7 @@ function callback(db, table) {
 
 
 
+// MARK: start
 MongoClient.connect(DB_URI, {useNewUrlParser: true}, function(err, db) {
     if (err) throw err;
     // connection is made
@@ -178,7 +202,7 @@ MongoClient.connect(DB_URI, {useNewUrlParser: true}, function(err, db) {
         return;
     });
     // MARK: query
-    quizGrades.find({name: {$in: ['Q9', 'Q10', 'Q11', 'Q12']}}).count(function (err, count) {
+    quizGrades.find({name: {$in: ['E0']}}).count(function (err, count) {
         quizGradeCount = count;
         return;
     });
@@ -202,7 +226,7 @@ MongoClient.connect(DB_URI, {useNewUrlParser: true}, function(err, db) {
     });
     
     // MARK: query 
-    quizGrades.find({name: {$in: ['Q9', 'Q10', 'Q11', 'Q12']}}).forEach(function(grade_doc) {
+    quizGrades.find({name: {$in: ['E0']}}).forEach(function(grade_doc) {
         if (!(grade_doc.email in table)) {
             table[grade_doc.email] = {}; 
             table[grade_doc.email][att] = [];
