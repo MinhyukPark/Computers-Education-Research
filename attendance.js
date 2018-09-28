@@ -53,14 +53,14 @@ function parseBeginnerResults(table) {
         var people = root_db.collection('people');
         var beginnerCount = 0;
 
-        people.find({'survey.ap.summary':{$eq: 0}}).count(function (err, count) {
+        people.find({'survey.ap.summary': 0}).count(function (err, count) {
             beginnerCount = count;
             return;
         });
 
         var currentBeginnerCount = 0;
     
-        people.find({'survey.ap.summary':{$eq: 0}}).forEach(function(people_doc) {
+        people.find({'survey.ap.summary': 0}).forEach(function(people_doc) {
             email_arr.push(people_doc.email)
             currentBeginnerCount++;
         }, function(err) {
