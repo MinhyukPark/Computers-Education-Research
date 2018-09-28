@@ -19,8 +19,13 @@ extractFeature()
 
 // END INT MAIT
 function extractFeatureCallback(db, active_students_table, passive_students_table) {
-    console.log(active_students_table);
-    console.log(passive_students_table);
+    N = 10
+    for (i = 0; i < N; i ++) {
+        console.log(active_students_table[Object.keys(active_students_table)[i]]);
+    } 
+    for (i = 0; i < N; i ++) {
+        console.log(passive_students_table[Object.keys(passive_students_table)[i]]);
+    } 
     db.close()
 }
 
