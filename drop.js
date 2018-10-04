@@ -34,10 +34,193 @@ const DB_URI = process.env.DB_URI;
 
 /* INT MAIN */
 
-// extractLecture()
-// extractQuiz()
-// extractHW()
-extractMP()
+lecture_tables = extractLecture()
+quiz_tables = extractQuiz()
+hw_tables = extractHW()
+mp_tables = extractMP()
+combined_table = [lecture_tables, quiz_tables, hw_tables, mp_tables]
+
+let data = {}
+let labels = {}
+
+for (var combined_table_index in combined_table) {
+    var current_active_table = combined_table[combined_table_index][0]
+    var current_passive_table = combined_table[combined_table_index][1]
+    var active_emails = Object.keys(current_active_table)
+    var passive_emails = Object.keys(current_passive_table)
+
+    switch(combined_table_index) {
+        case 0:
+            // LECTURE
+
+            for current_email_index in active_emails {
+                var lecture_recond_count = 0
+                var credit_count = 0
+                var late_early_count = 0
+                var current_email = active_emails[current_email_index]
+                for record_index in current_active_table[current_email] {
+                    record = current_active_table[current_email][record_index]
+                    lecture_record_count += 1
+                    if(record[2]) {
+                        credit_count += 1
+                    }
+                    if(record[0] && record[1]) {
+                        late_early_count += 2
+                    } else if (record[0] || record[1]) {
+                        late_early_count += 1
+                    }
+                }
+                data[current_email] = [lecture_record_count, credit_count, late_early_count]
+                labels[current_email] = 0
+            }
+            for current_email_index in passive_emails {
+                var lecture_recond_count = 0
+                var credit_count = 0
+                var late_early_count = 0
+                var current_email = passive_emails[current_email_index]
+                for record_index in current_passive_table[current_email] {
+                    record = current_passive_table[current_email][record_index]
+                    lecture_record_count += 1
+                    if(record[2]) {
+                        credit_count += 1
+                    }
+                    if(record[0] && record[1]) {
+                        late_early_count += 2
+                    } else if (record[0] || record[1]) {
+                        late_early_count += 1
+                    }
+                }
+                data[current_email] = [lecture_record_count, credit_count, late_early_count]
+                labels[current_email] = 1 
+            }
+            break
+        case 1:
+            for current_email_index in active_emails {
+                var quiz_count = 0
+                var quiz_average = 0
+                var quiz_trend = 0
+
+                var sum = 0
+                var first_sum = 0
+                var second_sum = 0 
+                var current_email = active_emails[current_email_index]
+                for record_index in current_active_table[current_email] {
+                    record = current_active_table[current_email]
+                    quiz_count += 1
+                    sum += record
+                    if(quiz_count < current_active_table[current_email].length) {
+                        first_sum += 1
+                    } else {
+                        second_sum += 1
+                    }
+                } 
+                quiz_average = sum / quiz_count
+                if(first_sum > second_sum) {
+                    quiz_trend = -1
+                } else {
+                    quiz_trend = 1
+                }
+                data[current_email].push(quiz_count, quiz_average, quiz_trend)
+            }
+
+            for current_email_index in passive_emails {
+                var quiz_count = 0
+                var quiz_average = 0
+                var quiz_trend = 0
+
+                var sum = 0
+                var first_sum = 0
+                var second_sum = 0 
+                var current_email = passive_emails[current_email_index]
+                for record_index in current_passive_table[current_email] {
+                    record = current_passive_table[current_email]
+                    quiz_count += 1
+                    sum += record
+                    if(quiz_count < current_passive_table[current_email].length) {
+                        first_sum += 1
+                    } else {
+                        second_sum += 1
+                    }
+                } 
+                quiz_average = sum / quiz_count
+                if(first_sum > second_sum) {
+                    quiz_trend = -1
+                } else {
+                    quiz_trend = 1
+                }
+                data[current_email].push(quiz_count, quiz_average, quiz_trend)
+            }
+            // QUIZ
+            break
+        case 2:
+            for current_email_index in active_emails {
+                var hw_count = 0
+                var hw_average = 0
+                var hw_trend = 0
+
+                var sum = 0
+                var first_sum = 0
+                var second_sum = 0 
+                var current_email = active_emails[current_email_index]
+                for record_index in current_active_table[current_email] {
+                    record = current_active_table[current_email]
+                    hw_count += 1
+                    sum += record
+                    if(hw_count < current_active_table[current_email].length) {
+                        first_sum += 1
+                    } else {
+                        second_sum += 1
+                    }
+                } 
+                hw_average = sum / hw_count
+                if(first_sum > second_sum) {
+                    hw_trend = -1
+                } else {
+                    hw_trend = 1
+                }
+                data[current_email].push(hw_count, hw_average, hw_trend)
+            }
+
+            for current_email_index in passive_emails {
+                var hw_count = 0
+                var hw_average = 0
+                var hw_trend = 0
+
+                var sum = 0
+                var first_sum = 0
+                var second_sum = 0 
+                var current_email = passive_emails[current_email_index]
+                for record_index in current_passive_table[current_email] {
+                    record = current_passive_table[current_email]
+                    hw_count += 1
+                    sum += record
+                    if(hw_count < current_passive_table[current_email].length) {
+                        first_sum += 1
+                    } else {
+                        second_sum += 1
+                    }
+                } 
+                hw_average = sum / hw_count
+                if(first_sum > second_sum) {
+                    hw_trend = -1
+                } else {
+                    hw_trend = 1
+                }
+                data[current_email].push(hw_count, hw_average, hw_trend)
+            }
+            // HW
+            break
+        case 3:
+            // MP
+            break
+        default:
+            console.log("ERROR - REACHED DEFAULT IN SWITCH STATEMENT")
+            break
+    }
+}
+
+
+
 /* END INT MAIN */
 
 function extractMPCallback(db, active_students_table, passive_students_table) {
@@ -55,6 +238,7 @@ function extractMPCallback(db, active_students_table, passive_students_table) {
         console.log(passive_students_table[Object.keys(passive_students_table)[i]]);
     } 
     db.close()
+    return [active_students_table, passive_students_table]
 }
 
 async function extractMP() {
@@ -112,7 +296,7 @@ async function extractMP() {
                             currentQuizGradesCount++;
                         }, function(err) {
                             if(currentQuizGradesCount === quizGradesCount) {
-                                extractHWCallback(db, active_students_table,
+                                return extractHWCallback(db, active_students_table,
                                                     passive_students_table) 
                             } else if(err) throw err;
                         });  
@@ -140,6 +324,7 @@ function extractHWCallback(db, active_students_table, passive_students_table) {
         console.log(passive_students_table[Object.keys(passive_students_table)[i]]);
     } 
     db.close()
+    return [active_students_table, passive_students_table]
 }
 
 async function extractHW() {
@@ -197,7 +382,7 @@ async function extractHW() {
                             currentQuizGradesCount++;
                         }, function(err) {
                             if(currentQuizGradesCount === quizGradesCount) {
-                                extractHWCallback(db, active_students_table,
+                                return extractHWCallback(db, active_students_table,
                                                     passive_students_table) 
                             } else if(err) throw err;
                         });  
@@ -224,6 +409,7 @@ function extractQuizCallback(db, active_students_table, passive_students_table) 
         console.log(passive_students_table[Object.keys(passive_students_table)[i]]);
     } 
     db.close()
+    return [active_students_table, passive_students_table]
 }
 
 async function extractQuiz() {
@@ -281,7 +467,7 @@ async function extractQuiz() {
                             currentQuizGradesCount++;
                         }, function(err) {
                             if(currentQuizGradesCount === quizGradesCount) {
-                                extractQuizCallback(db, active_students_table,
+                                return extractQuizCallback(db, active_students_table,
                                                     passive_students_table) 
                             } else if(err) throw err;
                         });  
@@ -309,6 +495,7 @@ function extractLectureCallback(db, active_students_table, passive_students_tabl
         console.log(passive_students_table[Object.keys(passive_students_table)[i]]);
     } 
     db.close()
+    return [active_students_table, passive_students_table]
 }
 
 async function extractLecture() { 
@@ -368,7 +555,7 @@ async function extractLecture() {
                             currentAttendanceCount++;
                         }, function(err) {
                             if(currentAttendanceCount === attendanceCount) {
-                                extractLectureCallback(db, active_students_table,
+                                return extractLectureCallback(db, active_students_table,
                                                        passive_students_table);
                             } else if(err) throw err;
                         });
