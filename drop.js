@@ -240,6 +240,67 @@ function main() {
                 // HW
                 break
             case '3':
+                for (var current_email_index in active_emails) {
+                    var mp_count = 0
+                    var mp_average = 0
+                    var mp_trend = 0
+
+                    var sum = 0
+                    var first_sum = 0
+                    var second_sum = 0 
+                    var current_email = active_emails[current_email_index]
+                    for (var record_index in current_active_table[current_email]) {
+                        record = current_active_table[current_email]
+                        mp_count += 1
+                        sum += record
+                        if(mp_count < current_active_table[current_email].length) {
+                            first_sum += 1
+                        } else {
+                            second_sum += 1
+                        }
+                    } 
+                    mp_average = sum / mp_count
+                    if(first_sum > second_sum) {
+                        mp_trend = -1
+                    } else {
+                        mp_trend = 1
+                    }
+                    if(isNaN(mp_average)) {
+                        mp_average = 0
+                    }
+                    data[current_email].push(mp_count, mp_average, mp_trend)
+                }
+
+                for (var current_email_index in passive_emails) {
+                    var mp_count = 0
+                    var mp_average = 0
+                    var mp_trend = 0
+
+                    var sum = 0
+                    var first_sum = 0
+                    var second_sum = 0 
+                    var current_email = passive_emails[current_email_index]
+                    for (var record_index in current_passive_table[current_email]) {
+                        record = current_passive_table[current_email]
+                        mp_count += 1
+                        sum += record
+                        if(mp_count < current_passive_table[current_email].length) {
+                            first_sum += 1
+                        } else {
+                            second_sum += 1
+                        }
+                    } 
+                    mp_average = sum / mp_count
+                    if(first_sum > second_sum) {
+                        mp_trend = -1
+                    } else {
+                        mp_trend = 1
+                    }
+                    if(isNaN(mp_average)) {
+                        mp_average = 0
+                    }
+                    data[current_email].push(mp_count, mp_average, mp_trend)
+                }
                 // MP
                 break
             default:
@@ -314,19 +375,19 @@ function extractMP() {
         const root_db = db.db('cs125');
         // MARK: COLLECTIONS
         var people = root_db.collection('people');        
-        var quizGrades = root_db.collection('quizGrades');
+        var MPGrades = root_db.collection('MPGrades');
         // MARK: COUNT
         var peopleCount = 0;
-        var quizGradesCount = 0;
+        var MPGradesCount = 0;
 
         var currentPeopleCount = 0;
         var currentQuizGradesCount = 0;
 
         people.find().count(function (err, count) {
             peopleCount = count;
-            quizGrades.find().count(function (err, count) {
-                quizGradesCount = count;
-                // console.log("total MP count is " + quizGradesCount);
+            MPGrades.find().count(function (err, count) {
+                MPGradesCount = count;
+                // console.log("total MP count is " + MPGradesCount);
                 //console.log("total people count is " + peopleCount);
                 // MARK: QUERY
                 people.find().forEach(function(people_doc) {
@@ -345,20 +406,19 @@ function extractMP() {
                 }, function(err) {
                     if(currentPeopleCount === peopleCount) {
                         // CUSTOM START
-                        quizGrades.find().forEach(function(quizGrades_doc) {
-                            if(quizGrades_doc.email in cached_table
-                            && quizGrades_doc.type == "homework") {
-                                if(quizGrades_doc.email in active_students_table) {
-                                    active_students_table[quizGrades_doc.email]
-                                                    .push(quizGrades_doc.score) 
+                        MPGrades.find().forEach(function(MPGrades_doc) {
+                            if(MPGrades_doc.email in cached_table) {
+                                if(MPGrades_doc.email in active_students_table) {
+                                    active_students_table[MPGrades_doc.email]
+                                               .push(MPGrades_doc.score.adjustedScore) 
                                 } else {
-                                    passive_students_table[quizGrades_doc.email]
-                                                     .push(quizGrades_doc.score) 
+                                    passive_students_table[MPGrades_doc.email]
+                                               .push(MPGrades_doc.score.adjustedScore) 
                                 }
                             }
                             currentQuizGradesCount++;
                         }, function(err) {
-                            if(currentQuizGradesCount === quizGradesCount) {
+                            if(currentQuizGradesCount === MPGradesCount) {
                                 return extractMPCallback(db, active_students_table,
                                                     passive_students_table) 
                             } else if(err) throw err;
