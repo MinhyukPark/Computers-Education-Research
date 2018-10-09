@@ -1,0 +1,20 @@
+Figure out how to get last active students
+    - figuring out when a student who dropped had last activity
+
+intellij data - not everyone uses it
+    - figure out how many people are using it
+    - email possibly mismatched
+        - github mapping
+
+quiz duration data 
+MPs are probbaly a predictor for dropping a course but less so for lectures
+
+progress has timestamp and grades
+intellij has begin and end timestamp
+
+collect intellij by hours of day
+graph of dates vs time spent on class for instance
+    - or keystrokes
+
+Notes:
+unix times are in milliseconds
