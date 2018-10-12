@@ -15,9 +15,28 @@ const MINUTE_IN_MILLISECONDS = 60000
 // INT MAIN
 main()
 // INT MAIN END
+//
+
+function output_data(active_students_table, progress_interval_table, db) {
+    console.log("output_data")
+    ppm_table = {}
+    for (const current_email of Object.keys(progress_interval_table)) {
+        ppm_table[current_email] = 0
+        counter = 0
+        for (interval_index in progress_interval_table[current_email]) {
+            ppm_table[current_email] += progress_interval_table[current_email][interval_index]
+            counter += 1
+        }
+        if(counter != 0) {
+            ppm_table[current_email] /= counter
+        }
+    }
+    console.log(ppm_table)
+    db.close()
+}
 
 function replace_range_active_table(active_students_table, db) {
-    console.log(active_students_table)
+    console.log("replace range")
     minute_interval_table = {}
     for (const current_email of Object.keys(active_students_table)) {
         active_students_table[current_email].sort();
@@ -30,11 +49,34 @@ function replace_range_active_table(active_students_table, db) {
             while(minute_end < current_timestamp_arr[time_stamp_index][1]) {
                 minute_interval_table[current_email].push([minute_start, minute_end])
                 minute_start = minute_end
-                minute_end += MINUTE_IN_MILLESECONDS
+                minute_end += MINUTE_IN_MILLISECONDS
             }
         } 
     }
-    console.log(active_students_table)
+    const root_db = db.db('cs125')
+    var progress = root_db.collection('progress')
+    var progress_count = 0
+    var current_progress_count = 0
+    progress_interval_table = {}
+    progress.find().count(function (err, count) {
+        progress_count = count
+        progress.find().forEach(function(progress_doc) {
+            if(progress_doc.students.people in active_students_table) {
+                for(interval_index in minute_interval_table[progress_doc.students.people]) {
+                    current_start = minute_interval_table[progress_doc.students.people][interval_index][0]
+                    current_end = minute_interval_table[progress_doc.students.people][interval_index][1]
+                    if(progress_doc.timestamp > current_start && progress_doc.timestamp < current_end) {
+                        progress_interval_table[progress_doc.students.people] = progress_doc.totalScore
+                        break;
+                    }
+                }
+            }
+        }, function(err) {
+            if(current_progress_count >= progress_count) {
+                output_data(active_students_table, progress_interval_table, db);    
+            } else if(err) throw err;
+        });
+    });
 }
 
 function fill_active_table(active_students_table, db) {
