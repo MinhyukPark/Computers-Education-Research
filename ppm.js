@@ -10,12 +10,30 @@ var MongoClient = require('mongodb').MongoClient;
 
 // constants
 const DB_URI = process.env.DB_URI;
+const MINUTE_IN_MILLISECONDS = 60000
 
 // INT MAIN
 main()
 // INT MAIN END
 
 function replace_range_active_table(active_students_table, db) {
+    console.log(active_students_table)
+    minute_interval_table = {}
+    for (const current_email of Object.keys(active_students_table)) {
+        active_students_table[current_email].sort();
+        current_timestamp_arr = active_students_table[current_email]
+        last_end_stamp = -1
+        minute_interval_table[current_email] = []
+        for (time_stamp_index in current_timestamp_arr) {
+            minute_start = current_timestamp_arr[time_stamp_index][0]
+            minute_end = minute_start + MINUTE_IN_MILLISECONDS
+            while(minute_end < current_timestamp_arr[time_stamp_index][1]) {
+                minute_interval_table[current_email].push([minute_start, minute_end])
+                minute_start = minute_end
+                minute_end += MINUTE_IN_MILLESECONDS
+            }
+        } 
+    }
     console.log(active_students_table)
 }
 
