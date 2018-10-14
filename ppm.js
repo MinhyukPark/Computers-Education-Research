@@ -54,22 +54,30 @@ function replace_range_active_table(active_students_table, db) {
         } 
     }
     const root_db = db.db('cs125')
+    console.log("progress")
     var progress = root_db.collection('progress')
     var progress_count = 0
     var current_progress_count = 0
     progress_interval_table = {}
     progress.find().count(function (err, count) {
         progress_count = count
+        console.log(progress_count)
         progress.find().forEach(function(progress_doc) {
             if(progress_doc.students.people in active_students_table) {
                 for(interval_index in minute_interval_table[progress_doc.students.people]) {
                     current_start = minute_interval_table[progress_doc.students.people][interval_index][0]
                     current_end = minute_interval_table[progress_doc.students.people][interval_index][1]
                     if(progress_doc.timestamp > current_start && progress_doc.timestamp < current_end) {
-                        progress_interval_table[progress_doc.students.people] = progress_doc.totalScore
-                        break;
+                        if(!(progress_doc.students.people in progress_interval_table)) {
+                            progress_interval_table[progress_doc.students.people] = []
+                        }
+                        progress_interval_table[progress_doc.students.people].push(progress_doc.totalScore)
                     }
                 }
+            }
+            current_progress_count += 1
+            if(current_progress_count % 10000 == 0) {
+                console.log(current_progress_count)
             }
         }, function(err) {
             if(current_progress_count >= progress_count) {
