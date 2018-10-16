@@ -17,7 +17,7 @@ main()
 // INT MAIN END
 //
 
-function output_data(active_students_table, progress_interval_table, db) {
+function output_data(progress_interval_table, db) {
     // console.log("output_data")
     ppm_table = {}
     for (const current_email of Object.keys(progress_interval_table)) {
@@ -33,16 +33,16 @@ function output_data(active_students_table, progress_interval_table, db) {
             ppm_table[current_email] /= counter
         }
     }
-    //console.log(ppm_table)
+    // console.log(ppm_table)
     for (const current_email of Object.keys(ppm_table)) {
       console.log(current_email)
-      console.log(ppm_table(current_email))
+      console.log(ppm_table[current_email])
     }
     db.close()
 }
 
 function replace_range_active_table(active_students_table, db) {
-    //console.log("replace range")
+    // console.log("replace range")
     minute_interval_table = {}
     for (const current_email of Object.keys(active_students_table)) {
         active_students_table[current_email].sort();
@@ -64,15 +64,15 @@ function replace_range_active_table(active_students_table, db) {
         } 
     }
     const root_db = db.db('cs125')
-    //console.log("progress")
+    // console.log("progress")
     var progress = root_db.collection('progress')
     var progress_count = 0
     var current_progress_count = 0
-    //console.log(Object.keys(minute_interval_table).length)
+    // console.log(Object.keys(minute_interval_table).length)
     progress_interval_table = {}
     progress.find().count(function (err, count) {
         progress_count = count
-        //console.log(progress_count)
+        // console.log(progress_count)
         progress.find().forEach(function(progress_doc) {
             if(progress_doc.students.people in active_students_table) {
                 for(interval_index in minute_interval_table[progress_doc.students.people]) {
@@ -88,25 +88,25 @@ function replace_range_active_table(active_students_table, db) {
             }
             current_progress_count += 1
             if(current_progress_count % 10000 == 0) {
-                //console.log(current_progress_count)
+                // console.log(current_progress_count)
             }
         }, function(err) {
             if(current_progress_count >= progress_count) {
-                output_data(active_students_table, progress_interval_table, db);    
+                output_data(progress_interval_table, db);    
             } else if(err) throw err;
         });
     });
 }
 
 function fill_active_table(active_students_table, db) {
-    //console.log("Fill active table")
+    // console.log("Fill active table")
     const root_db = db.db('cs125')
     var intellij = root_db.collection('intellij');
     var intellij_count = 0;
     var current_intellij_count = 0;
     intellij.find().count(function (err, count) {
         intellij_count = count
-        //console.log(intellij_count)
+        // console.log(intellij_count)
         intellij.find().forEach(function(intellij_doc) {
             var current_email = intellij_doc.email
             if(current_email in active_students_table) {
@@ -115,7 +115,7 @@ function fill_active_table(active_students_table, db) {
             }
             current_intellij_count ++;
             if(current_intellij_count % 10000 == 0) {
-                //console.log(current_intellij_count)
+                // console.log(current_intellij_count)
             }
         }, function(err) {
             if(current_intellij_count >= intellij_count) {
@@ -126,7 +126,7 @@ function fill_active_table(active_students_table, db) {
 }
 
 function main() {
-    //console.log("INT MAIN");
+    // console.log("INT MAIN");
     MongoClient.connect(DB_URI, {useNewUrlParser: true}, function(err, db) {
         if (err) throw err;
         var active_students_table = {}
@@ -144,11 +144,11 @@ function main() {
 
         people.find().count(function (err, count) {
             peopleCount = count;
-            //console.log(peopleCount)
+            // console.log(peopleCount)
             MPGrades.find().count(function (err, count) {
                 MPGradesCount = count;
                 // console.log("total MP count is " + MPGradesCount);
-                //console.log("total people count is " + peopleCount);
+                // console.log("total people count is " + peopleCount);
                 // MARK: QUERY
                 people.find().forEach(function(people_doc) {
                     if(people_doc.semester == "Fall2018"
