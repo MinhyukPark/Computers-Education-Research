@@ -18,25 +18,31 @@ main()
 //
 
 function output_data(active_students_table, progress_interval_table, db) {
-    console.log("output_data")
+    // console.log("output_data")
     ppm_table = {}
     for (const current_email of Object.keys(progress_interval_table)) {
         ppm_table[current_email] = 0
         counter = 0
         for (interval_index in progress_interval_table[current_email]) {
-            ppm_table[current_email] += progress_interval_table[current_email][interval_index]
+            var prev_val = ppm_table[current_email]
+            var cur_val = progress_interval_table[current_email][interval_index]
+            ppm_table[current_email] = Math.max(cur_val - prev_val, 0)
             counter += 1
         }
         if(counter != 0) {
             ppm_table[current_email] /= counter
         }
     }
-    console.log(ppm_table)
+    //console.log(ppm_table)
+    for (const current_email of Object.keys(ppm_table)) {
+      console.log(current_email)
+      console.log(ppm_table(current_email))
+    }
     db.close()
 }
 
 function replace_range_active_table(active_students_table, db) {
-    console.log("replace range")
+    //console.log("replace range")
     minute_interval_table = {}
     for (const current_email of Object.keys(active_students_table)) {
         active_students_table[current_email].sort();
@@ -46,22 +52,27 @@ function replace_range_active_table(active_students_table, db) {
         for (time_stamp_index in current_timestamp_arr) {
             minute_start = current_timestamp_arr[time_stamp_index][0]
             minute_end = minute_start + MINUTE_IN_MILLISECONDS
-            while(minute_end < current_timestamp_arr[time_stamp_index][1]) {
-                minute_interval_table[current_email].push([minute_start, minute_end])
-                minute_start = minute_end
-                minute_end += MINUTE_IN_MILLISECONDS
+            if(minute_end - minute_start < MINUTE_IN_MILLISECONDS) {
+            } else {
+                while(minute_end < current_timestamp_arr[time_stamp_index][1]) {
+                    minute_interval_table[current_email].push([minute_start, minute_end])
+                    minute_start = minute_end
+                    minute_end += MINUTE_IN_MILLISECONDS
+                }
             }
+            minute_interval_table[current_email].push([minute_start, minute_end])
         } 
     }
     const root_db = db.db('cs125')
-    console.log("progress")
+    //console.log("progress")
     var progress = root_db.collection('progress')
     var progress_count = 0
     var current_progress_count = 0
+    //console.log(Object.keys(minute_interval_table).length)
     progress_interval_table = {}
     progress.find().count(function (err, count) {
         progress_count = count
-        console.log(progress_count)
+        //console.log(progress_count)
         progress.find().forEach(function(progress_doc) {
             if(progress_doc.students.people in active_students_table) {
                 for(interval_index in minute_interval_table[progress_doc.students.people]) {
@@ -77,7 +88,7 @@ function replace_range_active_table(active_students_table, db) {
             }
             current_progress_count += 1
             if(current_progress_count % 10000 == 0) {
-                console.log(current_progress_count)
+                //console.log(current_progress_count)
             }
         }, function(err) {
             if(current_progress_count >= progress_count) {
@@ -88,14 +99,14 @@ function replace_range_active_table(active_students_table, db) {
 }
 
 function fill_active_table(active_students_table, db) {
-    console.log("Fill active table")
+    //console.log("Fill active table")
     const root_db = db.db('cs125')
     var intellij = root_db.collection('intellij');
     var intellij_count = 0;
     var current_intellij_count = 0;
     intellij.find().count(function (err, count) {
         intellij_count = count
-        console.log(intellij_count)
+        //console.log(intellij_count)
         intellij.find().forEach(function(intellij_doc) {
             var current_email = intellij_doc.email
             if(current_email in active_students_table) {
@@ -104,7 +115,7 @@ function fill_active_table(active_students_table, db) {
             }
             current_intellij_count ++;
             if(current_intellij_count % 10000 == 0) {
-                console.log(current_intellij_count)
+                //console.log(current_intellij_count)
             }
         }, function(err) {
             if(current_intellij_count >= intellij_count) {
@@ -115,7 +126,7 @@ function fill_active_table(active_students_table, db) {
 }
 
 function main() {
-    console.log("INT MAIN");
+    //console.log("INT MAIN");
     MongoClient.connect(DB_URI, {useNewUrlParser: true}, function(err, db) {
         if (err) throw err;
         var active_students_table = {}
@@ -133,6 +144,7 @@ function main() {
 
         people.find().count(function (err, count) {
             peopleCount = count;
+            //console.log(peopleCount)
             MPGrades.find().count(function (err, count) {
                 MPGradesCount = count;
                 // console.log("total MP count is " + MPGradesCount);
