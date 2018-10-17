@@ -24,10 +24,13 @@ function output_data(progress_interval_table, db) {
     for (const current_email of Object.keys(progress_interval_table)) {
         ppm_table[current_email] = 0
         counter = 0
+        var prev_val = 0
         for (interval_index in progress_interval_table[current_email]) {
-            var prev_val = ppm_table[current_email]
             var cur_val = progress_interval_table[current_email][interval_index]
-            ppm_table[current_email] = Math.max(cur_val - prev_val, 0)
+            ppm_table[current_email] += Math.max(cur_val - prev_val, 0)
+            if(prev_val < cur_val) {
+                prev_val = cur_val
+            }
             counter += 1
         }
         if(counter != 0) {
@@ -84,6 +87,8 @@ function replace_range_active_table(active_students_table, db) {
                             progress_interval_table[progress_doc.students.people] = []
                         }
                         progress_interval_table[progress_doc.students.people].push(progress_doc.totalScore)
+                    } else {
+                        progress_interval_table[progress_doc.students.people].push(0)
                     }
                 }
             }
