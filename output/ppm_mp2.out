@@ -1,0 +1,16 @@
+
+<--- Last few GCs --->
+
+[20952:0x55a542bbaf50]   450761 ms: Mark-sweep 1383.9 (1424.5) -> 1383.9 (1424.5) MB, 877.4 / 0.0 ms  (average mu = 0.193, current mu = 0.169) allocation failure GC in old space requested
+[20952:0x55a542bbaf50]   452112 ms: Mark-sweep 1383.9 (1424.5) -> 1383.9 (1424.5) MB, 1244.1 / 0.0 ms  (average mu = 0.135, current mu = 0.079) allocation failure GC in old space requested
+
+
+<--- JS stacktrace --->
+
+==== JS stack trace =========================================
+
+    0: ExitFrame [pc: 0x9fb9bddc01d]
+Security context: 0x201bb351e681 <JSObject>
+    1: /* anonymous */ [0x2eacdd4954f9] [/home/min/Downloads/git_repos/CS-Education-Research/ppm.js:~77] [pc=0x9fb9be61fa5](this=0x0e1a0751aa19 <JSGlobal Object>,progress_doc=0x323f02882de1 <Object map = 0x23a818917d89>)
+    2: /* anonymous */(aka /* anonymous */) [0x2eacdd495269] [/home/min/Downloads/git_repos/CS-Education-Research/node_modules/mongodb/lib/c...
+

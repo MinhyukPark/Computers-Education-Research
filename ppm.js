@@ -11,6 +11,7 @@ var MongoClient = require('mongodb').MongoClient;
 // constants
 const DB_URI = process.env.DB_URI;
 const MINUTE_IN_MILLISECONDS = 60000
+const CURRENT_MP = 'MP2'
 
 // INT MAIN
 main()
@@ -70,10 +71,10 @@ function replace_range_active_table(active_students_table, db) {
     var current_progress_count = 0
     // console.log(Object.keys(minute_interval_table).length)
     progress_interval_table = {}
-    progress.find().count(function (err, count) {
+    progress.find({name: CURRENT_MP}).count(function (err, count) {
         progress_count = count
         // console.log(progress_count)
-        progress.find().forEach(function(progress_doc) {
+        progress.find({name: CURRENT_MP}).forEach(function(progress_doc) {
             if(progress_doc.students.people in active_students_table) {
                 for(interval_index in minute_interval_table[progress_doc.students.people]) {
                     current_start = minute_interval_table[progress_doc.students.people][interval_index][0]
@@ -145,7 +146,8 @@ function main() {
         people.find().count(function (err, count) {
             peopleCount = count;
             // console.log(peopleCount)
-            MPGrades.find().count(function (err, count) {
+            // MARK: is this not unneccesary?
+            MPGrades.find({assignment: CURRENT_MP}).count(function (err, count) {
                 MPGradesCount = count;
                 // console.log("total MP count is " + MPGradesCount);
                 // console.log("total people count is " + peopleCount);
