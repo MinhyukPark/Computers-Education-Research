@@ -62,3 +62,4 @@ typings/
 
 # custom
 nohup.out
+*.json
