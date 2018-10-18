@@ -14,19 +14,42 @@ var assert = require('chai').assert
 // https://github.com/lodash/lodash
 var _ = require('lodash')
 
+// https://github.com/jonschlinkert/data-store
+const CLEAN_RUN = false
+var Store = require('data-store')
+if(CLEAN_RUN) {
+    Store = new Store({path: './cache.json'})
+} else {
+    Store = new Store('cache', {cwd: './'})
+}
+
 // constants
 const LOCAL_URI = process.env.LOCAL_URI
 const MINUTE_IN_MILLISECONDS = 60000
 const FIVE_MINUTE = MINUTE_IN_MILLISECONDS * 5
-const CURRENT_MP = 'MP1'
+const CURRENT_MP = 'MP2'
 
 // INT MAIN
 main()
 async function main() {
     console.log("start")
-    var people_arr = await get_people_arr()
+    var people_arr = null
+    var time_arr = null
+    if(CLEAN_RUN) {
+        people_arr = await get_people_arr()
+        time_arr = await get_time_arr(people_arr)
+        
+        Store.set('people_arr', people_arr)
+        Store.set('time_arr', time_arr)
+        Store.save() 
+    } else {
+        people_arr = Store.get('people_arr')
+        time_arr = Store.get('time_arr')
+    }
+    assert.exists(people_arr, 'people_arr assert')
+    assert.exists(time_arr, 'time_arr assert')
+
     console.log("people_arr count " + Object.keys(people_arr).length)
-    var time_arr = await get_time_arr(people_arr)
     console.log("time_arr count " + Object.keys(time_arr).length)
     console.log("done")
 }
