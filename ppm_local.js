@@ -17,6 +17,7 @@ var _ = require('lodash')
 // constants
 const LOCAL_URI = process.env.LOCAL_URI
 const MINUTE_IN_MILLISECONDS = 60000
+const FIVE_MINUTE = MINUTE_IN_MILLISECONDS * 5
 const CURRENT_MP = 'MP1'
 
 // INT MAIN
@@ -43,9 +44,8 @@ async function get_time_arr(people_arr) {
     const intellij = root_db.collection('intellij')
     assert.exists(intellij, 'intellij assert')
 
-
+    time_arr = {}
     for (current_email in people_arr) {
-        console.log("email: " + current_email)
         var intellij_query = { 
             email: current_email,
             MP: CURRENT_MP
@@ -56,17 +56,70 @@ async function get_time_arr(people_arr) {
             end: 1
         }
         
+        var intellij_sort = {
+            start: 1
+        }
+
         var current_arr = await (intellij.find(
             intellij_query
         ).project(
             intellij_project
+        ).sort(
+            intellij_sort
         ).toArray())
         assert.exists(current_arr, 'current_arr assert')
-        console.log(current_arr)
+        time_arr[current_email] = []
+
+        if(current_arr.length < 1) {
+            console.log(current_email + " has fewer than 1 entry")
+            continue
+        }
+
+        var time_index = 0
+        time_arr[current_email].push([0, 0])
+        for (interval_index in current_arr) {
+            current_interval = current_arr[interval_index]
+            // interval already allocated
+            if(current_interval.start >=
+                time_arr[current_email][time_index][0] &&
+               current_interval.end <=
+                time_arr[current_email][time_index][1]) {
+                continue
+            // interval is on the border
+            } else if(
+      current_interval.start <= time_arr[current_email][time_index][1] &&
+         current_interval.end > time_arr[current_email][time_index][1]) {
+
+                while(current_interval.end >
+                      time_arr[current_email][time_index][1]) {
+                    var previous_end =
+                        time_arr[current_email][time_index][1]
+                    time_arr[current_email].push(
+                          [previous_end, previous_end + FIVE_MINUTE])
+                    time_index += 1
+                }
+            } else if(
+      current_interval.start > time_arr[current_email][time_index][1] &&
+         current_interval.end > time_arr[current_email][time_index][1]) {
+                time_arr[current_email].push(
+           [current_interval.start,current_interval.start + FIVE_MINUTE])
+                time_index += 1
+                while(current_interval.end >
+                      time_arr[current_email][time_index - 1][1]) {
+                    var previous_end =
+                        time_arr[current_email][time_index - 1][1]
+                    time_arr[current_email].push(
+                          [previous_end, previous_end + FIVE_MINUTE])
+                    time_index += 1
+                }
+                
+            }
+
+        }
     }
 
     db.close()
-    return 
+    return time_arr
 }
 async function get_people_arr() {
     const db = await MongoClient.connect(LOCAL_URI, {
