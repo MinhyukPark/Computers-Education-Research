@@ -2,6 +2,13 @@
  * Outputting the time each student spends on MP in CS125
  */
 
+// constants
+const CLEAN_RUN = false
+const LOCAL_URI = process.env.LOCAL_URI
+const MINUTE_IN_MILLISECONDS = 60000
+const FIVE_MINUTE = MINUTE_IN_MILLISECONDS * 5
+const CURRENT_MP = 'MP2'
+
 // https://github.com/motdotla/dotenv
 require('dotenv').config()
 
@@ -15,7 +22,6 @@ var assert = require('chai').assert
 var _ = require('lodash')
 
 // https://github.com/jonschlinkert/data-store
-const CLEAN_RUN = false
 var Store = require('data-store')
 if(CLEAN_RUN) {
     Store = new Store({path: './cache.json'})
@@ -23,11 +29,6 @@ if(CLEAN_RUN) {
     Store = new Store('cache', {cwd: './'})
 }
 
-// constants
-const LOCAL_URI = process.env.LOCAL_URI
-const MINUTE_IN_MILLISECONDS = 60000
-const FIVE_MINUTE = MINUTE_IN_MILLISECONDS * 5
-const CURRENT_MP = 'MP2'
 
 // INT MAIN
 main()
