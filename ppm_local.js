@@ -18,7 +18,7 @@ var _ = require('lodash')
 // https://github.com/moment/moment
 var moment = require('moment')
 
-const CLEAN_RUN = true
+const CLEAN_RUN = false
 // https://github.com/jonschlinkert/data-store
 var Store = require('data-store')
 if(CLEAN_RUN) {
@@ -56,11 +56,17 @@ async function main() {
         time_arr = Store.get('time_arr')
         points_arr = Store.get('points_arr')
     }
+    /* override */
+    points_arr = await get_points_arr(time_arr)
+    Store.set('points_arr', points_arr)
+    /* override end */
     assert.exists(people_arr, 'people_arr assert')
     assert.exists(time_arr, 'time_arr assert')
     assert.exists(points_arr, 'points_arr assert')
 
     // display_time_arr(time_arr)
+    var query_email = ""    
+    display_points_arr(points_arr, query_email)
 
     console.log("people_arr count " + Object.keys(people_arr).length)
     console.log("time_arr count " + Object.keys(time_arr).length)
@@ -68,11 +74,26 @@ async function main() {
     console.log("done")
 }
 
-function display_time_arr(arr) {
-    for (current_email in arr) {
+function display_points_arr(points_arr, query_email) {
+    if(query_email == "") {
+        for (current_email of Object.keys(points_arr)) {
+            console.log(current_email)
+            for (cur_point in points_arr[current_email]) {
+                console.log(points_arr[current_email][cur_point])
+            }
+        } 
+    } else {
+        for (cur_point in points_arr[query_email]) {
+            console.log(points_arr[query_email][cur_point])
+        }
+    }
+}
+
+function display_time_arr(time_arr) {
+    for (current_email of Object.keys(time_arr)) {
         console.log(current_email)
-        for (cur_time in arr[current_email]) {
-            console.log(moment(arr[current_email][cur_time][0]).format("YYYY-MM-DD hh:mm a") + " to " + moment(arr[current_email][cur_time][1]).format("YYYY-MM-DD hh:mm a"))
+        for (cur_time in time_arr[current_email]) {
+            console.log(moment(time_arr[current_email][cur_time][0]).format("YYYY-MM-DD hh:mm a") + " to " + moment(time_arr[current_email][cur_time][1]).format("YYYY-MM-DD hh:mm a"))
         }
     }
 }
@@ -91,10 +112,10 @@ async function get_points_arr(time_arr) {
     assert.exists(progress, 'progress assert')
 
     points_arr = {}
-    for (current_email in Object.keys(time_arr)) {
+    for (current_email of Object.keys(time_arr)) {
         var progress_query = { 
-            email: current_email,
-            MP: CURRENT_MP
+            'students.people': current_email,
+            name: CURRENT_MP
         }
 
         var progress_project = {
@@ -117,6 +138,7 @@ async function get_points_arr(time_arr) {
         points_arr[current_email] = current_arr
     }
 
+    db.close()
     return points_arr
 }
 
