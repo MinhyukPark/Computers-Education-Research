@@ -102,6 +102,7 @@ function display_matched_arr(matched_arr, query_email) {
         }
     }
 }
+
 function display_points_arr(points_arr, query_email) {
     if(query_email == "") {
         for (current_email of Object.keys(points_arr)) {
