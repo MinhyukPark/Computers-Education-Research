@@ -47,7 +47,7 @@ Email me at minhyuk2@illinois.edu and I would love to talk more about ways for y
 ## Style Guide
 A lot has changed since I first started this project.
 
-Currently I am exposing all the common functions and constants I need  through common.js. To see how to use the common module, refer to the way [last\_active.js](../node_scripts/last_active.js) interacts with [common.js](../node_scripts/common.js) and [constants.js](../node_scripts/constanst.js).
+Currently I am exposing all the common functions and constants I need  through common.js. To see how to use the common module, refer to the way [last\_active.js](../node_scripts/last_active.js) interacts with [common.js](../node_scripts/common.js) and [constants.js](../node_scripts/constants.js).
 
 
 ## Files
