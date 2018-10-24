@@ -18,7 +18,7 @@ var _ = require('lodash')
 // https://github.com/moment/moment
 var moment = require('moment')
 
-const CLEAN_RUN = false
+const CLEAN_RUN = true
 // https://github.com/jonschlinkert/data-store
 var Store = require('data-store')
 if(CLEAN_RUN) {
@@ -40,23 +40,27 @@ async function main() {
     console.log("start")
     var people_arr = null
     var time_arr = null
+    var points_arr = null
+
     if(CLEAN_RUN) {
         people_arr = await get_people_arr()
         time_arr = await get_time_arr(people_arr)
+        points_arr = await get_points_arr(time_arr)
         
         Store.set('people_arr', people_arr)
         Store.set('time_arr', time_arr)
+        Store.set('points_arr', points_arr)
         Store.save() 
     } else {
         people_arr = Store.get('people_arr')
         time_arr = Store.get('time_arr')
+        points_arr = Store.get('points_arr')
     }
     assert.exists(people_arr, 'people_arr assert')
     assert.exists(time_arr, 'time_arr assert')
-    // display_arr(time_arr)
+    assert.exists(points_arr, 'points_arr assert')
 
-    var points_arr = await get_points_arr(time_arr)
-    assert.exists(poinst_arr, 'points_arr assert')
+    // display_time_arr(time_arr)
 
     console.log("people_arr count " + Object.keys(people_arr).length)
     console.log("time_arr count " + Object.keys(time_arr).length)
@@ -64,7 +68,7 @@ async function main() {
     console.log("done")
 }
 
-function display_arr(arr) {
+function display_time_arr(arr) {
     for (current_email in arr) {
         console.log(current_email)
         for (cur_time in arr[current_email]) {
@@ -94,9 +98,12 @@ async function get_points_arr(time_arr) {
         }
 
         var progress_project = {
+            timestamp: 1,
+            totalScore: 1
         }
         
         var progress_sort = {
+            timestamp: 1
         }
 
         var current_arr = await (progress.find(
@@ -107,6 +114,8 @@ async function get_points_arr(time_arr) {
             progress_sort
         ).toArray())
         assert.exists(current_arr, 'current_arr assert')
+        points_arr[current_email] = current_arr
+    }
 
     return points_arr
 }
