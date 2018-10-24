@@ -37,43 +37,71 @@ const CURRENT_MP = 'MP2'
 // INT MAIN
 main()
 async function main() {
-    console.log("start")
+    // console.log("start")
     var people_arr = null
     var time_arr = null
     var points_arr = null
+    var matched_arr = null
 
     if(CLEAN_RUN) {
         people_arr = await get_people_arr()
         time_arr = await get_time_arr(people_arr)
         points_arr = await get_points_arr(time_arr)
+        matched_arr = get_matched_arr(time_arr, points_arr)
         
         Store.set('people_arr', people_arr)
         Store.set('time_arr', time_arr)
         Store.set('points_arr', points_arr)
+        Store.set('matched_arr', matched_arr)
         Store.save() 
     } else {
         people_arr = Store.get('people_arr')
         time_arr = Store.get('time_arr')
         points_arr = Store.get('points_arr')
+        matched_arr = Store.get('matched_arr')
     }
     /* override */
-    points_arr = await get_points_arr(time_arr)
-    Store.set('points_arr', points_arr)
+    // matched_arr = get_matched_arr(time_arr, points_arr)
+    // Store.set('matched_arr', matched_arr)
     /* override end */
     assert.exists(people_arr, 'people_arr assert')
     assert.exists(time_arr, 'time_arr assert')
     assert.exists(points_arr, 'points_arr assert')
+    assert.exists(matched_arr, 'matched_arr assert')
 
     // display_time_arr(time_arr)
-    var query_email = ""    
-    display_points_arr(points_arr, query_email)
+    var query_email = ""
+    // display_points_arr(points_arr, query_email)
+    display_matched_arr(matched_arr, query_email)
 
-    console.log("people_arr count " + Object.keys(people_arr).length)
-    console.log("time_arr count " + Object.keys(time_arr).length)
-    console.log("points_arr count" + Object.keys(points_arr).length)
-    console.log("done")
+    // console.log("people_arr count " + Object.keys(people_arr).length)
+    // console.log("time_arr count " + Object.keys(time_arr).length)
+    // console.log("points_arr count" + Object.keys(points_arr).length)
+    // console.log("matched_arr count" + Object.keys(matched_arr).length)
+    // console.log("done")
 }
-
+   
+function display_matched_arr(matched_arr, query_email) {
+    if(query_email == "") {
+        for (current_email of Object.keys(matched_arr)) {
+            if((matched_arr[current_email]).length < 1 || matched_arr[current_email]
+                .reduce((a, b) => a + b, 0) == 0) {
+                continue
+            }
+            console.log("new student")
+            console.log(current_email)
+            for (cur_point of matched_arr[current_email]) {
+                console.log(cur_point)
+            }
+        } 
+    } else {
+        console.log("querying " + query_email)
+        console.log(matched_arr[query_email])
+        for (cur_point of matched_arr[query_email]) {
+            console.log(cur_point)
+        }
+    }
+}
 function display_points_arr(points_arr, query_email) {
     if(query_email == "") {
         for (current_email of Object.keys(points_arr)) {
@@ -98,6 +126,37 @@ function display_time_arr(time_arr) {
     }
 }
 // INT MAIN END
+
+
+function get_matched_arr(time_arr, points_arr) {
+    var matched_arr = {}
+    for (current_email of Object.keys(time_arr)) {
+        // console.log("matching " + current_email)
+        matched_arr[current_email] = []
+        var prev_point = 0
+        var cur_index = 0 
+        for (cur_time of time_arr[current_email]) {
+            // console.log("cur time is " + cur_time)
+            cur_arr = points_arr[current_email][cur_index]
+            var cur_timestamp = -1
+            var cur_totalscore = -1
+            if(cur_arr != null) { 
+                cur_timestamp = cur_arr['timestamp']
+                cur_totalscore = cur_arr['totalScore']
+            }
+            if(cur_time[0] <= cur_timestamp && cur_timestamp < cur_time[1]) {
+                // console.log("score of " + cur_totalscore + " at time " + cur_timestamp)
+                matched_arr[current_email].push(cur_totalscore)
+                prev_point = cur_totalscore
+                cur_index += 1
+            } else {
+                matched_arr[current_email].push(prev_point)
+            }
+        }
+    }
+
+    return matched_arr
+}
 
 async function get_points_arr(time_arr) {
     const db = await MongoClient.connect(LOCAL_URI, {
