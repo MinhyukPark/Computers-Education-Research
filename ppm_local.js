@@ -15,6 +15,9 @@ var assert = require('chai').assert
 // https://github.com/lodash/lodash
 var _ = require('lodash')
 
+// https://github.com/moment/moment
+var moment = require('moment')
+
 const CLEAN_RUN = false
 // https://github.com/jonschlinkert/data-store
 var Store = require('data-store')
@@ -50,10 +53,20 @@ async function main() {
     }
     assert.exists(people_arr, 'people_arr assert')
     assert.exists(time_arr, 'time_arr assert')
+    display_arr(time_arr)
 
     console.log("people_arr count " + Object.keys(people_arr).length)
     console.log("time_arr count " + Object.keys(time_arr).length)
     console.log("done")
+}
+
+function display_arr(arr) {
+    for (current_email in arr) {
+        console.log(current_email)
+        for (cur_time in arr[current_email]) {
+            console.log(moment(cur_time[0] + " to " + moment(cur_time[1])))
+        }
+    }
 }
 // INT MAIN END
 
@@ -130,9 +143,9 @@ async function get_time_arr(people_arr) {
            [current_interval.start,current_interval.start + FIVE_MINUTE])
                 time_index += 1
                 while(current_interval.end >
-                      time_arr[current_email][time_index - 1][1]) {
+                      time_arr[current_email][time_index][1]) {
                     var previous_end =
-                        time_arr[current_email][time_index - 1][1]
+                        time_arr[current_email][time_index][1]
                     time_arr[current_email].push(
                           [previous_end, previous_end + FIVE_MINUTE])
                     time_index += 1
