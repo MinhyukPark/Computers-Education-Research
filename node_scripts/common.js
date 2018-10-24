@@ -3,7 +3,7 @@
  */
 
 var exports = {}
-
+/* node modules */
 var constants = exports.constants = require('./constants')
 
 // https://github.com/mongodb/node-mongodb-native
@@ -19,7 +19,10 @@ var moment = exports.moment = require('moment')
 
 // https://github.com/jonschlinkert/data-store
 var Store = exports.Store = require('data-store')
+/* node modules end */
 
+
+/* functions */
 var get_fresh_store = exports.get_fresh_store = function() {
     return new Store('cache', {cwd: './'})
 }
@@ -53,5 +56,6 @@ var get_people_arr = exports.get_people_arr = async function() {
     db.close()
     return _.keyBy(people_arr, 'email')
 }
+/* functions end */
 
 module.exports = exports

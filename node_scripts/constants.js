@@ -1,3 +1,7 @@
+/**
+ * Common constants - to be called through the common module
+ */
+
 // https://github.com/motdotla/dotenv
 var dotenv = require('dotenv').config()
 
