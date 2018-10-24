@@ -53,10 +53,14 @@ async function main() {
     }
     assert.exists(people_arr, 'people_arr assert')
     assert.exists(time_arr, 'time_arr assert')
-    display_arr(time_arr)
+    // display_arr(time_arr)
+
+    var points_arr = await get_points_arr(time_arr)
+    assert.exists(poinst_arr, 'points_arr assert')
 
     console.log("people_arr count " + Object.keys(people_arr).length)
     console.log("time_arr count " + Object.keys(time_arr).length)
+    console.log("points_arr count" + Object.keys(points_arr).length)
     console.log("done")
 }
 
@@ -64,11 +68,48 @@ function display_arr(arr) {
     for (current_email in arr) {
         console.log(current_email)
         for (cur_time in arr[current_email]) {
-            console.log(moment(cur_time[0] + " to " + moment(cur_time[1])))
+            console.log(moment(arr[current_email][cur_time][0]).format("YYYY-MM-DD hh:mm a") + " to " + moment(arr[current_email][cur_time][1]).format("YYYY-MM-DD hh:mm a"))
         }
     }
 }
 // INT MAIN END
+
+async function get_points_arr(time_arr) {
+    const db = await MongoClient.connect(LOCAL_URI, {
+        useNewUrlParser: true
+    })
+
+    assert.exists(db, "db assert")
+    const root_db = db.db('CS125_LOCAL')
+    assert.exists(root_db, "db assert")
+
+    const progress = root_db.collection('progress')
+    assert.exists(progress, 'progress assert')
+
+    points_arr = {}
+    for (current_email in Object.keys(time_arr)) {
+        var progress_query = { 
+            email: current_email,
+            MP: CURRENT_MP
+        }
+
+        var progress_project = {
+        }
+        
+        var progress_sort = {
+        }
+
+        var current_arr = await (progress.find(
+            progress_query
+        ).project(
+            progress_project
+        ).sort(
+            progress_sort
+        ).toArray())
+        assert.exists(current_arr, 'current_arr assert')
+
+    return points_arr
+}
 
 async function get_time_arr(people_arr) {
     const db = await MongoClient.connect(LOCAL_URI, {
