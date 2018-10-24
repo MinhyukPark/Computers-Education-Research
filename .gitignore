@@ -62,4 +62,5 @@ typings/
 
 # custom
 nohup.out
+!package-lock.json
 *.json
