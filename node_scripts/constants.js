@@ -8,5 +8,6 @@ var dotenv = require('dotenv').config()
 module.exports = {
     CURRENT_SEMESTER: process.env.CURRENT_SEMESTER,
     LOCAL_URI: process.env.LOCAL_URI,
-    DB_NAME: process.env.DB_NAME
+    DB_NAME: process.env.DB_NAME,
+    TWO_DAYS: 1000 * 60 * 60 * 24 * 2
 }
