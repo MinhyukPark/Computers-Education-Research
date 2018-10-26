@@ -23,3 +23,8 @@ unix times are in milliseconds
 Priorities:
 1. intellij students with score per minute (too slow)
 2. Last active student day
+
+db.MPGrades.find({'score.best': true, assignment: 'MP3', 'score.adjustedScore' : {$lt: 50}}, {email: 1, 'score.adjustedScore': 1}).sort({email: 1})
+
+db.MPGrades.find({'score.best': true, assignment: 'MP4', 'score.adjustedScore' : {$lt: 50}}, {email: 1, 'score.adjustedScore': 1}).sort({email: 1})
+
