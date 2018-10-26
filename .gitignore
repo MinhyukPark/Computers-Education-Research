@@ -64,3 +64,4 @@ typings/
 nohup.out
 !package-lock.json
 *.json
+*.out
