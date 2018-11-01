@@ -31,7 +31,7 @@ var get_cached_store = exports.get_cached_store = function() {
     return new Store({path: './cache.json'})
 }
 
-var get_active_people_arr = exports.get_people_arr = async function() {
+var get_active_people_arr = exports.get_active_people_arr = async function() {
     const db = await MongoClient.connect(constants.LOCAL_URI, {
         useNewUrlParser: true
     })
@@ -49,12 +49,12 @@ var get_active_people_arr = exports.get_people_arr = async function() {
         semester: constants.CURRENT_SEMESTER
     }
 
-    var people_arr = await (people.find(people_query).toArray())
-    people_count = people_arr.length
-    assert.exists(people_count, 'people_count assert')
+    var active_people_arr = await (people.find(people_query).toArray())
+    active_people_count = active_people_arr.length
+    assert.exists(active_people_count, 'active_people_count assert')
 
     db.close()
-    return _.keyBy(people_arr, 'email')
+    return _.keyBy(active_people_arr, 'email')
 }
 
 var get_inactive_people_arr = exports.get_inactive_people_arr = async function() {
