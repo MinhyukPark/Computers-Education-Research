@@ -5,7 +5,7 @@
 var common = require('./common')
 
 const CLEAN_RUN = true
-const N = 30
+const N = 10
 
 /* INT MAIN */
 main()
@@ -50,30 +50,35 @@ async function get_bottom_n_arr(active_people_arr) {
     
     bottom_n_arr = {}
     mp_arr = ['MP0', 'MP1', 'MP2', 'MP3', 'MP4']
-    for (cur_mp in mp_arr) {
-        var MPGrades_query = {
-            assignment: cur_mp
-        }
 
-        var MPGrades_project = {
-            email: 1,
-            'scoring.adjustedScore': 1
-        }
+    for (cur_mp of mp_arr) {
+        for (current_email in active_people_arr) {
+            var MPGrades_query = {
+                assignment: cur_mp,
+                email: current_email,
+                'score.best': true
+            }
 
-        var MPGrades_sort = {
-            'scoring.adjustedScore': 1
-        }
+            var MPGrades_project = {
+                email: 1,
+                'score.adjustedScore': 1
+            }
 
-        var current_arr = await (MPGrades.find(
-            MPGrades_query
-        ).project(
-            MPGrades_project
-        ).sort(
-            MPGrades.sort
-        ).toArray())
-        common.assert.exists(current_arr, 'current_arr assert')
-       
-        console.log(current_arr)
-        db.close() 
+            var MPGrades_sort = {
+            }
+
+            var current_arr = await (MPGrades.find(
+                MPGrades_query
+            ).project(
+                MPGrades_project
+            ).sort(
+                MPGrades_sort
+            ).toArray())
+            current_arr.splice(current_arr.length * N / 100)
+            bottom_n_arr[cur_mp] = current_arr
+            common.assert.exists(current_arr, 'current_arr assert')
+        }
     }
+    console.log(bottom_n_arr)
+    db.close()
 }
