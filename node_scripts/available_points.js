@@ -46,7 +46,7 @@ const CLEAN_RUN = true
 /* INT MAIN */
 main()
 async function main() {
-    console.log("start")
+    // console.log("start")
     var cache = null
     var active_people_arr = null
     var available_poins_arr = null
@@ -70,10 +70,25 @@ async function main() {
     common.assert.exists(active_people_arr, "active_people_arr assert")
     common.assert.exists(components_arr, "components_arr assert")
     common.assert.exists(available_points_arr, "available_points_arr assert")
-    console.log("active_people_arr count " + Object.keys(active_people_arr).length)
-    console.log("done")
+    
+    output_available_points_arr(available_points_arr)
+    // console.log("active_people_arr count " + Object.keys(active_people_arr).length)
+    // console.log("done")
 }
 /* END INT MAIN */
+
+function output_available_points_arr(available_points_arr) {
+    for(class_point of available_points_arr["class"]) {
+        console.log(class_point)
+    }
+    students_arr = Object.keys(available_points_arr["students"])
+    for(student of students_arr) {
+        console.log(student)
+        for(student_point of available_points_arr["students"][student]) {
+            console.log(student_point)
+        }
+    }
+}
 
 async function get_available_points_arr(active_people_arr, components_arr) {
     available_points_arr = {} 
@@ -116,11 +131,61 @@ async function get_available_points_arr(active_people_arr, components_arr) {
     ).sort(
         bestChanges_sort
     ).toArray())
+    var truncated_mod = 10
+    var current_mod_count = 0 
 
+    // class
     for (current of current_arr) {
+        /* DEBUG TRUNCATION */
+        if(current_mod_count % truncated_mod == 0) {
+            current_mod_count += 1
+        } else {
+            current_mod_count += 1
+            continue
+        }
+        /* DEBUG TRUNCATION END */
         var current_percentage_earned = 0
         for (component of Object.keys(components_arr)) {
-            
+            if(!(component in current) || current[component]["totals"]["noDrops"] == undefined) {
+                continue
+            }
+            current_component = current[component]["totals"]["noDrops"]
+            current_component_expected = components_arr[component]["expectedOutOf"]
+            current_component_scale = current_component["outOf"] / current_component_expected
+            current_component_scaled = 100 * current_component_scale
+
+            current_component_curve = components_arr[component]["percent"] / 100
+            current_component_curved = current_component_scaled * current_component_curve
+
+            current_percentage_earned += current_component_curved
+        }
+        available_points_arr["class"].push(current_percentage_earned)  
+    }
+
+    // students
+    for (current of current_arr) {
+        /* DEBUG TRUNCATION */
+        if(current_mod_count % truncated_mod == 0) {
+            current_mod_count += 1
+        } else {
+            current_mod_count += 1
+            continue
+        }
+        /* DEBUG TRUNCATION END */
+        var current_percentage_earned = 0
+        for (component of Object.keys(components_arr)) {
+            if(!(component in current) || current[component]["totals"]["noDrops"] == undefined) {
+                continue
+            }
+            current_component = current[component]["totals"]["noDrops"]
+            current_component_expected = components_arr[component]["expectedOutOf"]
+            current_component_scale = current_component["outOf"] / current_component_expected
+            current_component_scaled = current_component["percent"] * current_component_scale
+
+            current_component_curve = components_arr[component]["percent"] / 100
+            current_component_curved = current_component_scaled * current_component_curve
+
+            current_percentage_earned += current_component_curved
         }
         available_points_arr["students"][current_student].push(current_percentage_earned)  
     }
@@ -141,24 +206,25 @@ async function get_components_arr() {
     const best = root_db.collection("best")
     common.assert.exists(best, "best assert")
     var best_query = {
-        'semester': common.constants.CURRENT_SEMESTER
+        "semester": common.constants.CURRENT_SEMESTER
     }
 
     var best_project = {
-        'components': 1,
-        'semesterInfo': 1
+        "components": 1,
+        "semesterInfo": 1
     }
     
     var best_arr = await (best.find(best_query).project(best_project).limit(1).toArray())
 
-    var key_arr = best_arr[0]['components']
-    var val_arr = best_arr[0]['semesterInfo'] 
+    var key_arr = best_arr[0]["components"]
+    var val_arr = best_arr[0]["semesterInfo"] 
     
     var components_arr = {}
     for (key of key_arr) {
-       components_arr[key] = val_arr['components'][key]['expectedOutOf'] 
+       components_arr[key] = {} 
+       components_arr[key]["expectedOutOf"] = val_arr["components"][key]["expectedOutOf"]
+       components_arr[key]["percent"] = val_arr["components"][key]["percent"]
     }
-    console.log(components_arr)
 
     db.close()
     return components_arr
