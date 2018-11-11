@@ -1,8 +1,8 @@
 # CS125-Node-Mongo
 Let's Change Education in CS! :heart:
 ## Introduction
-#### What is this project about and why is it important?
-The field of education in Computer Science is severely lagging behind other disciplines such as math, literature, or history. Computer Science is distinguished by the way its concepts evolve. Notions of absolutes or static set-in-stone ideas do not exist in the world of Computer Science. This unique alacrity of motion leads to textbooks, course material, and pre-defined ways of teaching becoming obsolete faster than any other disciplines. In a traditional math classroom, iteration leads to success. A course becomes more successful by repeating what worked best in previous years. In a Computer Science classroom, iteration is at most a useful Computer Science concept and at worst a principle one should avoid. Repeating the same lecture with the same material leads to boredom and degeneration. What Computer Science classrooms needs today is a new way of teaching. A new way of teaching that augments education with Computer Science. A cycilcial model in which traditional education is bolstered using tools such as continuous integration and data analytics of Computer science while Computer Science is enriched using years and years of historical research data on how effectively humans learn.
+#### What is this project?
+Coming soon
 
 #### Great! How can I help?
 Email me at minhyuk2@illinois.edu and I would love to talk more about ways for you to get involved! 
