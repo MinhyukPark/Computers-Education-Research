@@ -55,19 +55,24 @@ async function main() {
     if(CLEAN_RUN) {
         cache = common.get_fresh_store()
         active_people_arr = await common.get_active_people_arr()
+        inactive_people_arr = await common.get_inactive_people_arr()
         components_arr = await get_components_arr()
         available_points_arr = await get_available_points_arr(active_people_arr, components_arr) 
+        // available_points_arr = await get_available_points_arr(inactive_people_arr, components_arr) 
 
         cache.set("active_people_arr", active_people_arr)
+        cache.set("inactive_people_arr", inactive_people_arr)
         cache.set("components_arr", components_arr)
         cache.set("available_points_arr", available_points_arr)
     } else {
         cache = common.get_cached_store()
         active_people_arr = cache.get("active_people_arr")
+        inactive_people_arr = cache.get("inactive_people_arr")
         components_arr = cache.get("components_arr")
         available_points_arr = cache.get("available_points_arr")
     }
     common.assert.exists(active_people_arr, "active_people_arr assert")
+    common.assert.exists(inactive_people_arr, "inactive_people_arr assert")
     common.assert.exists(components_arr, "components_arr assert")
     common.assert.exists(available_points_arr, "available_points_arr assert")
     
@@ -131,7 +136,7 @@ async function get_available_points_arr(active_people_arr, components_arr) {
     ).sort(
         bestChanges_sort
     ).toArray())
-    var truncated_mod = 10
+    var truncated_mod = 1 
     var current_mod_count = 0 
 
     // class
