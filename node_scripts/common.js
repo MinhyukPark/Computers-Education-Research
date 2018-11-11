@@ -31,6 +31,10 @@ var get_cached_store = exports.get_cached_store = function() {
     return new Store({path: './cache.json'})
 }
 
+var get_rand_int = exports.get_rand_int = function(max) {
+    return Math.floor(Math.random() * Math.floor(max))
+}
+
 var get_active_people_arr = exports.get_active_people_arr = async function() {
     const db = await MongoClient.connect(constants.LOCAL_URI, {
         useNewUrlParser: true
