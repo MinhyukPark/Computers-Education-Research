@@ -57,8 +57,8 @@ async function main() {
         active_people_arr = await common.get_active_people_arr()
         inactive_people_arr = await common.get_inactive_people_arr()
         components_arr = await get_components_arr()
-        available_points_arr = await get_available_points_arr(active_people_arr, components_arr) 
-        // available_points_arr = await get_available_points_arr(inactive_people_arr, components_arr) 
+        // available_points_arr = await get_available_points_arr(active_people_arr, components_arr) 
+        available_points_arr = await get_available_points_arr(inactive_people_arr, components_arr) 
 
         cache.set("active_people_arr", active_people_arr)
         cache.set("inactive_people_arr", inactive_people_arr)
