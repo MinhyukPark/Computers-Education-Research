@@ -83,6 +83,11 @@ async function main() {
 /* END INT MAIN */
 
 function output_available_points_arr(available_points_arr) {
+    console.log("timestamps")
+    for(timestamp of available_points_arr["timestamp"]) {
+        console.log(timestamp)
+    }
+    console.log("class")
     for(class_point of available_points_arr["class"]) {
         console.log(class_point)
     }
@@ -99,6 +104,7 @@ async function get_available_points_arr(active_people_arr, components_arr) {
     available_points_arr = {} 
     available_points_arr["class"] = []
     available_points_arr["students"] = {}
+    available_points_arr["timestamp"] = []
 
     rand_int = Object.keys(active_people_arr).length
     current_student = Object.keys(active_people_arr)[common.get_rand_int(rand_int)]
@@ -124,6 +130,7 @@ async function get_available_points_arr(active_people_arr, components_arr) {
         bestChanges_project[component + ".totals.noDrops.percent"] = 1
         bestChanges_project[component + ".totals.noDrops.outOf"] = 1
     }
+    bestChanges_project["timestamp"] = 1
 
     var bestChanges_sort = {
         "timestamp": 1 
@@ -165,6 +172,7 @@ async function get_available_points_arr(active_people_arr, components_arr) {
             current_percentage_earned += current_component_curved
         }
         available_points_arr["class"].push(current_percentage_earned)  
+        available_points_arr["timestamp"].push(current["timestamp"])
     }
 
     // students
