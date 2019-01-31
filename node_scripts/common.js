@@ -35,6 +35,34 @@ var get_rand_int = exports.get_rand_int = function(max) {
     return Math.floor(Math.random() * Math.floor(max))
 }
 
+var get_drop_date_arr = exports.get_drop_date_arr = async function() {
+    const db = await MongoClient.connect(constants.LOCAL_URI, {
+        useNewUrlParser: true
+    })
+
+    assert.exists(db, "db assert")
+    const root_db = db.db(constants.DB_NAME)
+    assert.exists(root_db, "db assert")
+
+    const peopleChanges = root_db.collection('peopleChanges')
+    assert.exists(peopleChanges, 'peopleChanges assert')
+
+    var peopleChanges_query = {
+        type: "left",
+        semester: constants.CURRENT_SEMESTER
+    }
+
+    var peopleChanges_project = {
+        email: 1,
+        "state.updated": 1
+    }
+
+    var drop_date_arr = await (peopleChanges.find(peopleChanges_query).project(peopleChanges_project).toArray())
+
+    db.close()
+    return _.keyBy(drop_date_arr, 'email')
+}
+
 var get_active_people_arr = exports.get_active_people_arr = async function() {
     const db = await MongoClient.connect(constants.LOCAL_URI, {
         useNewUrlParser: true
