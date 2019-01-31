@@ -60,11 +60,10 @@ with open(sys.argv[1], 'r') as f:
             s.append(float(line))
         line = f.readline()
         line_no += 1 
- 
 
 fig, ax = plt.subplots()
 ax.plot(t, c)
-ax.plot(t, s)
+ax.plot(t[:len(s)], s)
 
 # format the ticks
 ax.xaxis.set_major_locator(months)
@@ -87,26 +86,26 @@ def getBestRegressionScore(cur_num_line, t, s):
 
 def getBestRegressionScore_1(t, s):
     regr = linear_model.LinearRegression()
-    regr.fit(nor_t, s)
-    regr_y = regr.predict(nor_t)
+    regr.fit(t, s)
+    regr_y = regr.predict(t)
     return [r2_score(s, regr_y), -1]
 
 def getBestRegressionScore_2(t, s):
     best_score = 0
     best_split = -1
     best_shifter = 0
-    for cur_split_index in range(10, len(nor_t) - 10):
+    for cur_split_index in range(10, len(t) - 10):
 
         regr = linear_model.LinearRegression(fit_intercept = True)
-        regr.fit(nor_t[:cur_split_index], s[:cur_split_index])
-        regr_y = regr.predict(nor_t[:cur_split_index])
+        regr.fit(t[:cur_split_index], s[:cur_split_index])
+        regr_y = regr.predict(t[:cur_split_index])
         left_score = r2_score(s[:cur_split_index], regr_y)
 
          
         shifter = regr_y[len(regr_y) - 1]
         regr = linear_model.LinearRegression(fit_intercept = False)
-        regr.fit(nor_t[cur_split_index:], s[cur_split_index:] - shifter)
-        regr_y = regr.predict(nor_t[cur_split_index:])
+        regr.fit(t[cur_split_index:], s[cur_split_index:] - shifter)
+        regr_y = regr.predict(t[cur_split_index:])
         right_score = r2_score(s[cur_split_index:], regr_y + shifter)
      
         cur_score = (left_score + right_score) / 2
@@ -121,6 +120,7 @@ cur_score = 0
 cur_split_index = 0
 cur_num_line = 1
 nor_t = np.array([calendar.timegm(x.timetuple()) for x in t]).reshape(-1, 1)
+nor_t = nor_t[:len(s)]
 
 while(cur_score < 0.9):
     result = getBestRegressionScore(cur_num_line, nor_t, s)
@@ -136,7 +136,7 @@ if(cur_split_index == -1):
     regr = linear_model.LinearRegression()
     regr.fit(nor_t, s)
     regr_y = regr.predict(nor_t)
-    ax.plot(t, regr_y, color='red', linewidth=2)
+    ax.plot(t[:len(s)], regr_y, color='red', linewidth=2)
 else:
     regr = linear_model.LinearRegression(fit_intercept = True)
     regr.fit(nor_t[:cur_split_index], s[:cur_split_index])
@@ -153,7 +153,7 @@ else:
     print (regr_right_y)
 
     ax.plot(t[:cur_split_index], regr_left_y, color='blue', linewidth=2)
-    ax.plot(t[cur_split_index:], regr_right_y, color='red', linewidth=2)
+    ax.plot(t[cur_split_index:len(s)], regr_right_y, color='red', linewidth=2)
 
 plt.show()
 
