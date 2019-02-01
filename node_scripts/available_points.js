@@ -4,8 +4,8 @@
 
 var common = require('./common')
 
-const CLEAN_RUN = true
-const RECORD_COUNTER_THRESHOLD = 3
+const CLEAN_RUN = false
+const RECORD_COUNTER_THRESHOLD = common.constants.RECORD_COUNTER_THRESHOLD
 // timestamp
 // semesterInfo
 //  -- components
@@ -60,11 +60,13 @@ async function main() {
         inactive_people_arr = await common.get_inactive_people_arr()
         components_arr = await get_components_arr()
         drop_date_arr = await common.get_drop_date_arr() 
+        prune_people_arr = await common.get_prune_people_arr(drop_date_arr, inactive_people_arr)
         // available_points_arr = await get_available_points_arr(active_people_arr, components_arr) 
-        available_points_arr = await get_available_points_arr(inactive_people_arr, components_arr, drop_date_arr) 
+        available_points_arr = await get_available_points_arr(prune_people_arr, components_arr, drop_date_arr) 
 
         cache.set("active_people_arr", active_people_arr)
         cache.set("inactive_people_arr", inactive_people_arr)
+        cache.set("prune_people_arr", prune_people_arr)
         cache.set("components_arr", components_arr)
         cache.set("drop_date_arr", drop_date_arr)
         cache.set("available_points_arr", available_points_arr)
@@ -72,16 +74,19 @@ async function main() {
         cache = common.get_cached_store()
         active_people_arr = cache.get("active_people_arr")
         inactive_people_arr = cache.get("inactive_people_arr")
+        prune_people_arr = cache.get("prune_people_arr")
         components_arr = cache.get("components_arr")
         drop_date_arr = cache.get("drop_date_arr")
         available_points_arr = cache.get("available_points_arr")
     }
     common.assert.exists(active_people_arr, "active_people_arr assert")
     common.assert.exists(inactive_people_arr, "inactive_people_arr assert")
+    common.assert.exists(prune_people_arr, "prune_people_arr assert")
     common.assert.exists(components_arr, "components_arr assert")
     common.assert.exists(drop_date_arr, "drop_date_arr assert")
     common.assert.exists(available_points_arr, "available_points_arr assert")
     
+    available_points_arr = await get_available_points_arr(prune_people_arr, components_arr, drop_date_arr) 
     output_available_points_arr(available_points_arr)
     // console.log("active_people_arr count " + Object.keys(active_people_arr).length)
     // console.log("done")
@@ -124,47 +129,36 @@ async function get_available_points_arr(people_arr, components_arr, drop_date_ar
     const bestChanges = root_db.collection("bestChanges")
     common.assert.exists(bestChanges, "bestChanges assert")
 
-    // MARK: picking student at random
-    var record_counter = 0
+    var record_counter = 0 
     var current_student = null
     var current_arr = null
     
-    while(record_counter < RECORD_COUNTER_THRESHOLD) {
-        record_counter = 0
-        rand_int = Object.keys(people_arr).length
-        current_student = Object.keys(people_arr)[common.get_rand_int(rand_int)]
-        available_points_arr["students"][current_student] = []
+    current_student = Object.keys(people_arr)[process.argv[2]]
+    available_points_arr["students"][current_student] = []
 
-        var bestChanges_query = {
-            email: current_student
-        }
+    var bestChanges_query = {
+        email: current_student
+    }
 
-        var bestChanges_project = {}
-        for (component of Object.keys(components_arr)) {
-            bestChanges_project[component + ".totals.noDrops.percent"] = 1
-            bestChanges_project[component + ".totals.noDrops.outOf"] = 1
-        }
-        bestChanges_project["timestamp"] = 1
+    var bestChanges_project = {}
+    for (component of Object.keys(components_arr)) {
+        bestChanges_project[component + ".totals.noDrops.percent"] = 1
+        bestChanges_project[component + ".totals.noDrops.outOf"] = 1
+    }
+    bestChanges_project["timestamp"] = 1
 
-        var bestChanges_sort = {
-            "timestamp": 1 
-        }
+    var bestChanges_sort = {
+        "timestamp": 1 
+    }
 
-        current_arr = await (bestChanges.find(
-            bestChanges_query
-        ).project(
-            bestChanges_project
-        ).sort(
-            bestChanges_sort
-        ).toArray())
-        for (current of current_arr) {
-            if(new Date(drop_date_arr[current_student]["state"]["updated"]) < new Date(current["timestamp"])) {
-                break
-            }
-            record_counter += 1
-        }
-    } 
-    // MARK: end picking student at random
+    current_arr = await (bestChanges.find(
+        bestChanges_query
+    ).project(
+        bestChanges_project
+    ).sort(
+        bestChanges_sort
+    ).toArray())
+
     var truncated_mod = 1 
     var current_mod_count = 0 
 
@@ -256,7 +250,8 @@ async function get_components_arr() {
 
     var key_arr = best_arr[0]["components"]
     var val_arr = best_arr[0]["semesterInfo"] 
-    var exclude_arr = ['homework', 'extra', 'lectures', 'quizzes', 'labs', 'exams']
+    var exclude_arr = ['homework', 'extra', 'lectures', 'quizzes', 'labs', 'exams', 'MPs']
+    exclude_arr = []
     
     var components_arr = {}
     for (key of key_arr) {

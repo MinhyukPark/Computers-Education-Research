@@ -14,6 +14,7 @@ from numpy import dot
 from numpy.linalg import solve
 from numpy.polynomial.polynomial import Polynomial as P, polyvander as V
 from scipy.linalg import qr 
+from scipy.stats import linregress
 
 
 months = mdates.MonthLocator()
@@ -116,20 +117,44 @@ def getBestRegressionScore_2(t, s):
             best_shifter = shifter
     return [best_score, best_split]
 
-cur_score = 0
-cur_split_index = 0
-cur_num_line = 1
-nor_t = np.array([calendar.timegm(x.timetuple()) for x in t]).reshape(-1, 1)
+def getRegressionScore(cur_split_index, nor_t, s):
+    print(nor_t[cur_split_index:])
+    print(s[cur_split_index:])
+    res = linregress(nor_t[cur_split_index:], s[cur_split_index:])
+    return res
+    '''
+    return r2_score(flat_t[cur_split_index:], s[cur_split_index:]) 
+    '''
+
+def checkDeviation(s):
+    baseline = s[len(s) - 1]
+    for cur in s:
+        if(abs(cur - baseline) > (baseline * 0.05)):
+            return False
+    return True 
+        
+
+
+cur_score = 0.0 
+cur_split_index = len(s) - 1
+nor_t = np.array([calendar.timegm(x.timetuple()) for x in t])
 nor_t = nor_t[:len(s)]
-
-while(cur_score < 0.9):
-    result = getBestRegressionScore(cur_num_line, nor_t, s)
-    if(result == None):
+result = True
+while(result):
+    result = checkDeviation(s[cur_split_index:])
+    cur_split_index -= 1
+    if(cur_split_index == -1):
         break
-    cur_score = result[0]
-    cur_split_index = result[1]
-    cur_num_line += 1 
 
+if(cur_split_index != -1):
+    ax.plot(t[cur_split_index + 2:len(s)], s[cur_split_index + 2:], color='red', linewidth=2)
+    print(t[cur_split_index + 2]),
+    print("    "),
+    print(t[len(s) - 1])
+        
+
+
+'''
 
 
 if(cur_split_index == -1):
@@ -154,8 +179,9 @@ else:
 
     ax.plot(t[:cur_split_index], regr_left_y, color='blue', linewidth=2)
     ax.plot(t[cur_split_index:len(s)], regr_right_y, color='red', linewidth=2)
+'''
 
-plt.show()
+# plt.show()
 
 
 

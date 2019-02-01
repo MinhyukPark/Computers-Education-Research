@@ -35,6 +35,56 @@ var get_rand_int = exports.get_rand_int = function(max) {
     return Math.floor(Math.random() * Math.floor(max))
 }
 
+var get_prune_people_arr = exports.get_prune_people_arr = async function(drop_date_arr, people_arr) {
+    ret_arr = []
+    const db = await MongoClient.connect(constants.LOCAL_URI, {
+        useNewUrlParser: true
+    })
+
+    assert.exists(db, "db assert")
+    const root_db = db.db(constants.DB_NAME)
+    assert.exists(root_db, "db assert")
+
+    const bestChanges = root_db.collection("bestChanges")
+    assert.exists(bestChanges, "bestChanges assert")
+
+    for(current in people_arr) {
+        console.log(current)
+        record_counter = 0
+        current_student = current
+
+        var bestChanges_query = {
+            email: current_student
+        }
+
+        var bestChanges_project = {}
+        bestChanges_project["timestamp"] = 1
+
+        var bestChanges_sort = {
+            "timestamp": 1 
+        }
+
+        current_arr = await (bestChanges.find(
+            bestChanges_query
+        ).project(
+            bestChanges_project
+        ).sort(
+            bestChanges_sort
+        ).toArray())
+        for (current of current_arr) {
+            if(new Date(drop_date_arr[current_student]["state"]["updated"]) < new Date(current["timestamp"])) {
+                break
+            }
+            record_counter += 1
+        }
+        if(record_counter >= constants.RECORD_COUNTER_THRESHOLD) {
+            ret_arr.push(people_arr[current_student])
+        }
+    }
+    db.close()
+    return _.keyBy(ret_arr, 'email')
+}
+
 var get_drop_date_arr = exports.get_drop_date_arr = async function() {
     const db = await MongoClient.connect(constants.LOCAL_URI, {
         useNewUrlParser: true
