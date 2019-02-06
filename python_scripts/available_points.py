@@ -151,6 +151,8 @@ if(cur_split_index != -1):
     print(t[cur_split_index + 2]),
     print("    "),
     print(t[len(s) - 1])
+    print("    "),
+    #print(cur_student)
         
 
 
@@ -181,7 +183,7 @@ else:
     ax.plot(t[cur_split_index:len(s)], regr_right_y, color='red', linewidth=2)
 '''
 
-# plt.show()
+plt.show()
 
 
 

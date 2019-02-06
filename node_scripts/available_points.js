@@ -1,5 +1,5 @@
 /**
- * (Skeleton file for basic javascript)
+ * Available points for eoch student vs class total
  */
 
 var common = require('./common')

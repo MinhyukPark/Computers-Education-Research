@@ -5,6 +5,7 @@ from datetime import datetime
 
 a = []
 e = []
+d = []
 
 with open(sys.argv[1], 'r') as f:
     line = f.readline()
@@ -17,14 +18,15 @@ with open(sys.argv[1], 'r') as f:
         line = f.readline()
         print(line_no)
         line_no += 1 
-
+d = [(x - y) for x,y in zip(a, e)]
+for c in d:
+    print(c)
 fig,ax = plt.subplots(1, 1)
-bins = int(len(a) / 8)
-ax.hist(a, alpha = 0.5, label = "roster", bins = bins)
-ax.hist(e, alpha = 0.5, label = "data", bins = bins)
+bins = int(len(d) / 4)
+ax.hist(d, alpha = 0.5, label = "roster", bins = bins)
 
-ax.xaxis.set_major_locator(mdates.AutoDateLocator())
-ax.xaxis.set_major_formatter(mdates.DateFormatter("%m.%d"))
+#ax.xaxis.set_major_locator(mdates.AutoDateLocator())
+#ax.xaxis.set_major_formatter(mdates.DateFormatter("%m.%d"))
 
 ax.legend(loc = 'upper right')
 plt.show()

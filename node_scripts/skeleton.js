@@ -22,7 +22,6 @@ async function main() {
         active_people_arr = cache.get("active_people_arr")
     }
     common.assert.exists(active_people_arr, "active_people_arr assert")
-    console.log("active_people_arr count " + Object.keys(active_people_arr).length)
     console.log("done")
 }
 /* END INT MAIN */
