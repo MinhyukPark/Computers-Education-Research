@@ -12,6 +12,7 @@ var MongoClient = exports.MongoClient = require('mongodb').MongoClient
 // https://github.com/lodash/lodash
 var _ = exports._ = require('lodash')
 
+// https://github.com/chaijs/chai
 var assert = exports.assert = require('chai').assert
 
 // https://github.com/moment/moment

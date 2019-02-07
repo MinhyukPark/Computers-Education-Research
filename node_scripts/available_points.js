@@ -1,5 +1,5 @@
 /**
- * Available points for eoch student vs class total
+ * Available points for each student vs class total
  */
 
 var common = require('./common')
@@ -86,6 +86,7 @@ async function main() {
     common.assert.exists(drop_date_arr, "drop_date_arr assert")
     common.assert.exists(available_points_arr, "available_points_arr assert")
     
+    components_arr = await get_components_arr()
     available_points_arr = await get_available_points_arr(prune_people_arr, components_arr, drop_date_arr) 
     output_available_points_arr(available_points_arr)
     // console.log("active_people_arr count " + Object.keys(active_people_arr).length)
@@ -250,8 +251,7 @@ async function get_components_arr() {
 
     var key_arr = best_arr[0]["components"]
     var val_arr = best_arr[0]["semesterInfo"] 
-    var exclude_arr = ['homework', 'extra', 'lectures', 'quizzes', 'labs', 'exams', 'MPs']
-    exclude_arr = []
+    var exclude_arr = ['homework', 'extra', 'lectures', 'quizzes', 'labs', 'exams']
     
     var components_arr = {}
     for (key of key_arr) {

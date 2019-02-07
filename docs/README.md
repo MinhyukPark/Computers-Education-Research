@@ -47,21 +47,37 @@ Email me at minhyuk2@illinois.edu and I would love to talk more about ways for y
 ## Style Guide
 A lot has changed since I first started this project.
 
-Currently I am exposing all the common functions and constants I need  through common.js. To see how to use the common module, refer to the way [last\_active.js](../node_scripts/last_active.js) interacts with [common.js](../node_scripts/common.js) and [constants.js](../node_scripts/constants.js).
+Currently I am exposing all the common functions and constants I need  through common.js. To see how to use the common module, there's a skeleton file [skeleton.js](../node_scripts/skeletor.js).
 
 
 ## Files
-attendance.py
-- reads an input file of alternating rows of number data and plots them on a 2d plane
+\[insert\_word\].py
+- reads an input file and visualizes them
+- the python files are not very polished and they are nothing more than quick scripts to make calls to matplotib.
 
 attendance.js
-- prints numbers to stdout in alternating rows of whatever the user decided to query such as parsing quizzes 9 through 12 of only beginners in the class.
+- Finding any kind of significance between class attendance and other class metric
+
+available\_points.js
+- Available points for each student vs class total
+
+common.js
+- Common function
+
+constants.js
+- Common constants - to be called through the common module
 
 drop.js
-- performs k means analysis of students to determine the likelihood a student will drop the course
+- Performs k means analysis of students to determine the likelihood a student will drop the course
+
+example.js
+- example javascript file
+
+last\_active.js
+- Outputting the last day on which a student was active
 
 ppm.js
-- calculates the amount of points a student earned in a given amount of time on a specified assignment, split up by intervals of minutes, five minutes, or other values.
+- Calculates the amount of points a student earned in a given amount of time on a specified assignment, split up by intervals of minutes, five minutes, or other values.
 
 ppm\_local.js
 - heavily optimized version of ppm.js
@@ -71,6 +87,12 @@ last\_active.js
 
 ppm.py
 - parser used for ppm output files resembling attendance.py structure
+
+skeleton.js
+- Skeleton file for basic javascript
+
+under.js
+- Get bottom N% of students in MP performance
 
 \[export/import\]\_\[collection\].sh
 - exports/imports the specified collection from remote to local

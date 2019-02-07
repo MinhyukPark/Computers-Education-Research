@@ -1,7 +1,5 @@
 /**
- * Finding any kind of significance between class attendance and 
- * other class metric
- * - currently using mainly spearman-rho correlation
+ * Performs k means analysis of students to determine the likelihood a student will drop the course
  */
 
 /*

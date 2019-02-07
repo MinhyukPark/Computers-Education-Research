@@ -1,5 +1,5 @@
 /**
- *  file to get bottom N % of students in MP performance
+ *  File to get bottom N % of students in MP performance
  */
 
 var common = require('./common')

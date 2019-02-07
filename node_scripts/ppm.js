@@ -1,5 +1,5 @@
 /**
- * Outputting the time each student spends on MP in CS125
+ * Calculates the amount of points a student earned in a given amount of time on a specified assignment, split up by intervals of minutes, five minutes, or other values.
  */
 
 // https://github.com/motdotla/dotenv
