@@ -62,7 +62,9 @@ async function main() {
         drop_date_arr = await common.get_drop_date_arr() 
         prune_people_arr = await common.get_prune_people_arr(drop_date_arr, inactive_people_arr)
         // available_points_arr = await get_available_points_arr(active_people_arr, components_arr) 
-        available_points_arr = await get_available_points_arr(prune_people_arr, components_arr, drop_date_arr) 
+        tuple_points = await get_available_points_arr(prune_people_arr, components_arr, drop_date_arr) 
+        available_points_arr = tuple_points[0]
+        change_arr = tuple_points[1]
 
         cache.set("active_people_arr", active_people_arr)
         cache.set("inactive_people_arr", inactive_people_arr)
@@ -70,6 +72,7 @@ async function main() {
         cache.set("components_arr", components_arr)
         cache.set("drop_date_arr", drop_date_arr)
         cache.set("available_points_arr", available_points_arr)
+        cache.set("change_arr", change_arr)
     } else {
         cache = common.get_cached_store()
         active_people_arr = cache.get("active_people_arr")
@@ -78,6 +81,7 @@ async function main() {
         components_arr = cache.get("components_arr")
         drop_date_arr = cache.get("drop_date_arr")
         available_points_arr = cache.get("available_points_arr")
+        change_arr = cache.get("change_arr")
     }
     common.assert.exists(active_people_arr, "active_people_arr assert")
     common.assert.exists(inactive_people_arr, "inactive_people_arr assert")
@@ -85,16 +89,17 @@ async function main() {
     common.assert.exists(components_arr, "components_arr assert")
     common.assert.exists(drop_date_arr, "drop_date_arr assert")
     common.assert.exists(available_points_arr, "available_points_arr assert")
+    //common.assert.exists(change_arr, "change_arr")
     
     components_arr = await get_components_arr()
-    available_points_arr = await get_available_points_arr(prune_people_arr, components_arr, drop_date_arr) 
-    output_available_points_arr(available_points_arr)
+    tuple_points = await get_available_points_arr(prune_people_arr, components_arr, drop_date_arr) 
+    output_available_points_arr(tuple_points[0], tuple_points[1])
     // console.log("active_people_arr count " + Object.keys(active_people_arr).length)
     // console.log("done")
 }
 /* END INT MAIN */
 
-function output_available_points_arr(available_points_arr) {
+function output_available_points_arr(available_points_arr, change_arr) {
     console.log("timestamps")
     for(timestamp of available_points_arr["timestamp"]) {
         console.log(timestamp)
@@ -109,6 +114,10 @@ function output_available_points_arr(available_points_arr) {
         for(student_point of available_points_arr["students"][student]) {
             console.log(student_point)
         }
+    }
+    console.log("change")
+    for(change_arr_index in change_arr) {
+        console.log(change_arr[change_arr_index])
     }
 }
 
@@ -193,6 +202,14 @@ async function get_available_points_arr(people_arr, components_arr, drop_date_ar
     }
 
     // students
+    var previous_component_arr = {};
+    for (component of Object.keys(components_arr)) {
+        previous_component_arr[component] = 0.0
+    }
+
+    var change_arr = Array(current_arr.length).fill(0)
+    var current_count_change = 0
+
     for (current of current_arr) {
         if(new Date(drop_date_arr[current_student]["state"]["updated"]) < new Date(current["timestamp"])) {
             break
@@ -219,12 +236,16 @@ async function get_available_points_arr(people_arr, components_arr, drop_date_ar
             current_component_curved = current_component_scaled * current_component_curve
 
             current_percentage_earned += current_component_curved
+            if(previous_component_arr[component] < current_component_curved) {
+                previous_component_arr[component] = current_component_curved
+                change_arr[current_count_change] = component
+            }
         }
         available_points_arr["students"][current_student].push(current_percentage_earned)  
+        current_count_change += 1
     }
-
     db.close()
-    return available_points_arr
+    return [available_points_arr, change_arr]
 }
 
 async function get_components_arr() {
@@ -252,6 +273,7 @@ async function get_components_arr() {
     var key_arr = best_arr[0]["components"]
     var val_arr = best_arr[0]["semesterInfo"] 
     var exclude_arr = ['homework', 'extra', 'lectures', 'quizzes', 'labs', 'exams']
+    exclude_arr = []
     
     var components_arr = {}
     for (key of key_arr) {

@@ -6,6 +6,7 @@ from dateutil.parser import parse
 import numpy as np
 import matplotlib.dates as mdates
 import matplotlib.cbook as cbook
+import matplotlib.patches as mpatches
 from sklearn import datasets
 from sklearn.metrics import mean_squared_error, r2_score
 import calendar
@@ -25,31 +26,43 @@ daysFmt = mdates.DateFormatter('%m-%d')
 t = []
 c = []
 s = []
+change = []
 cur_student = ""
 with open(sys.argv[1], 'r') as f:
     line = f.readline()
     is_t = False
     is_c = False
     is_s = False
+    is_change = False
     line_no = 1
     while line:
         if("timestamps" in line):
             is_t = True
             is_c = False
             is_s = False 
+            is_change = False
             line = f.readline()
             continue
         if("class" in line):
             is_t = False
             is_c = True
             is_s = False 
+            is_change = False
             line = f.readline()
             continue
         if('@' in line):
             is_t = False
             is_c = False
             is_s = True 
+            is_change = False
             cur_student = "sample student"
+            line = f.readline()
+            continue
+        if('change' in line):
+            is_t = False
+            is_c = False
+            is_s = False 
+            is_change = True
             line = f.readline()
             continue
         if(is_t):
@@ -59,13 +72,53 @@ with open(sys.argv[1], 'r') as f:
             c.append(float(line))
         elif(is_s):
             s.append(float(line))
+        elif(is_change):
+            change.append(line.strip())
         line = f.readline()
         line_no += 1 
 
 fig, ax = plt.subplots()
-ax.plot(t, c)
-ax.plot(t[:len(s)], s)
 
+## print separate components here
+color_dict = {'MPs': '#ffa659',
+              'lectures': '#f2ccff',
+              'extra': '#969696',
+              'homework': '#fcc5b8',
+              'quizzes': '#fff963',
+              'labs': '#8eff90',
+              'exams': '#28acff',
+               'class': '#1c0623'}
+
+ax.plot(t, c, color=color_dict['class'])
+for i in range(len(s)):
+    start = i
+    end = -1
+    start_label = change[start]
+    for j in range(start, len(s)):
+        if(start_label == '0'):
+            if(change[j] != 0):
+                start_label = change[j]
+        elif(start_label == change[j]):
+            pass
+        else:
+            end = j
+            i = j
+            j = len(s)
+    if(start_label == '0' and i == (len(s) - 1) or end == -1):
+        print("ah")
+    else:
+        print((start, end))
+        ax.plot(t[start:end], s[start:end], color=color_dict[start_label])
+
+lecture_patch = mpatches.Patch(color=color_dict['lectures'], label='lectures')
+extra_patch = mpatches.Patch(color=color_dict['extra'], label='extra')
+homework_patch = mpatches.Patch(color=color_dict['homework'], label='homework')
+quizzes_patch = mpatches.Patch(color=color_dict['quizzes'], label='quizzes')
+labs_patch = mpatches.Patch(color=color_dict['labs'], label='labs')
+exams_patch = mpatches.Patch(color=color_dict['exams'], label='exams')
+MPs_patch = mpatches.Patch(color=color_dict['MPs'], label='MPs')
+class_patch = mpatches.Patch(color=color_dict['class'], label='class total available points')
+ax.legend(loc="upper left", handles=[lecture_patch, extra_patch, homework_patch, quizzes_patch, labs_patch, exams_patch, MPs_patch, class_patch])
 # format the ticks
 ax.xaxis.set_major_locator(months)
 ax.xaxis.set_major_formatter(monthsFmt)
@@ -76,7 +129,7 @@ ax.xaxis.set_minor_formatter(daysFmt)
 ax.format_xdata = mdates.DateFormatter('%Y-%m-%d')
 ax.grid(True)
 
-ax.legend(["class", cur_student], loc="upper left")
+# ax.legend(["class", cur_student], loc="upper left")
 
 # regression stuff
 def getBestRegressionScore(cur_num_line, t, s):
