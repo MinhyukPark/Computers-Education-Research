@@ -4,7 +4,7 @@
 
 var common = require('./common')
 
-const CLEAN_RUN = false
+const CLEAN_RUN = true
 const RECORD_COUNTER_THRESHOLD = common.constants.RECORD_COUNTER_THRESHOLD
 // timestamp
 // semesterInfo
@@ -91,8 +91,8 @@ async function main() {
     common.assert.exists(available_points_arr, "available_points_arr assert")
     //common.assert.exists(change_arr, "change_arr")
     
-    components_arr = await get_components_arr()
-    tuple_points = await get_available_points_arr(prune_people_arr, components_arr, drop_date_arr) 
+    //components_arr = await get_components_arr()
+    //tuple_points = await get_available_points_arr(prune_people_arr, components_arr, drop_date_arr) 
     output_available_points_arr(tuple_points[0], tuple_points[1])
     // console.log("active_people_arr count " + Object.keys(active_people_arr).length)
     // console.log("done")
