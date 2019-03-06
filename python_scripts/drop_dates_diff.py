@@ -1,6 +1,8 @@
 import sys
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import plotly as py
+import plotly.graph_objs as go
 from datetime import datetime
 
 a = []
@@ -29,4 +31,11 @@ ax.hist(d, alpha = 0.5, label = "roster", bins = bins)
 #ax.xaxis.set_major_formatter(mdates.DateFormatter("%m.%d"))
 
 ax.legend(loc = 'upper right')
+
+plotly_fig = py.tools.make_subplots(rows=1, cols=1, specs=[[{}]], shared_xaxes=True, shared_yaxes=True)
+drop_data = go.Histogram(x=d, name = "drop dates difference")
+plotly_fig.append_trace(drop_data, 1, 1)
+plotly_fig['layout'].update(height=800, width=800, title='drop dates')
+py.offline.plot(plotly_fig)
+
 plt.show()

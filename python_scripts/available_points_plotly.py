@@ -1,6 +1,8 @@
 import sys
 import matplotlib.pyplot as plt
-import plotly.plotly as py
+import plotly as py
+from plotly.graph_objs import *
+import plotly.graph_objs as go
 from sklearn import linear_model
 from datetime import datetime
 from dateutil.parser import parse
@@ -18,6 +20,14 @@ from numpy.polynomial.polynomial import Polynomial as P, polyvander as V
 from scipy.linalg import qr 
 from scipy.stats import linregress
 
+
+NROW = 148 + 1 + 1
+spec = []
+for i in range(NROW):
+    spec.append([{}])
+
+#plotly_fig = py.tools.make_subplots(rows=NROW, cols=1, specs=spec, shared_xaxes=True, shared_yaxes=True, vertical_spacing=0.001)
+plotly_data = []
 
 months = mdates.MonthLocator()
 days = mdates.DayLocator()
@@ -88,9 +98,20 @@ color_dict = {'MPs': '#ffa659',
               'quizzes': '#fff963',
               'labs': '#8eff90',
               'exams': '#28acff',
-               'class': '#1c0623'}
+               'class': '#1c0623',
+               'post_drop': 'rgb(255,0,0)'}
+ax.plot(t, c, color = color_dict['class'])
+class_data = go.Scatter(x=t, y=c, name = "class", line = dict(color=color_dict['class'], width = 2))
+#plotly_fig.append_trace(class_data, 1, 1)
+plotly_data.append(class_data)
 
-ax.plot(t, c, color=color_dict['class'])
+student_data = {}
+for key in color_dict:
+    student_data[key] = ([], [])
+
+
+plot_row_counter = 2
+counter = 0
 for i in range(len(s)):
     start = i
     end = -1
@@ -108,8 +129,24 @@ for i in range(len(s)):
     if(start_label == '0' and i == (len(s) - 1) or end == -1):
         print("ah")
     else:
-        print((start, end))
-        ax.plot(t[start:end], s[start:end], color=color_dict[start_label])
+        #print((start, end))
+        ax.plot(t[start:end], s[start:end], color=color_dict[start_label]) 
+        student_data[start_label][0].extend(t[start:end])
+        student_data[start_label][1].extend(s[start:end])
+        cur_data = go.Scatter(x=t[start:end], y=s[start:end], name=start_label, line = dict(color=color_dict[start_label], width = 2))
+        #plotly_fig.append_trace(cur_data, plot_row_counter, 1)
+        plotly_data.append(cur_data)
+        plot_row_counter += 1
+        counter += 1
+print(counter)
+'''
+for key in student_data:
+    if(key == 'class' or key == 'post_drop'):
+        continue
+    cur_data = go.Scatter(x=student_data[key][0], y=student_data[key][1], mode='markers', name=key)#, line = dict(color=color_dict[key], width = 2))
+    #plotly_fig.append_trace(cur_data, plot_row_counter, 1)
+    plot_row_counter += 1
+'''
 
 lecture_patch = mpatches.Patch(color=color_dict['lectures'], label='lectures')
 extra_patch = mpatches.Patch(color=color_dict['extra'], label='extra')
@@ -202,6 +239,9 @@ while(result):
 
 if(cur_split_index != -1):
     ax.plot(t[cur_split_index + 2:len(s)], s[cur_split_index + 2:], color='red', linewidth=2)
+    post_drop_data = go.Scatter(x=t[cur_split_index + 2:len(s)], y=s[cur_split_index + 2:], name='post_drop', line = dict(color=color_dict['post_drop'], width = 2))
+    #plotly_fig.append_trace(post_drop_data, NROW, 1)
+    plotly_data.append(post_drop_data)
     print(t[cur_split_index + 2]),
     print("    "),
     print(t[len(s) - 1])
@@ -239,8 +279,10 @@ else:
 
 
 #py.plot_mpl(ax, filename="plotly from matplotlib")
+#plotly_fig['layout'].update(height=800, width=800, title='available points')
+#py.offline.plot(plotly_fig)
+layout = {"title": "available points"}
+fig = Figure(data = Data(plotly_data), layout = layout)
+py.offline.plot(fig)
 plt.show()
-
-
-
 
