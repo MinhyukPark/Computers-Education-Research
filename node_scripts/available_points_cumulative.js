@@ -129,7 +129,7 @@ async function get_available_points_arr(people_arr, components_arr, drop_date_ar
     common.assert.exists(root_db, "db assert")
 
     const bestChanges = root_db.collection("bestChanges")
-    common.assert.exists(bestChanges, "bestChanges assert")
+    common.assert.exists(betChanges, "bestChanges assert")
 
     var record_counter = 0 
     var current_student = null
