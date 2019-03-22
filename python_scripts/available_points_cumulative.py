@@ -107,5 +107,6 @@ student_trace = go.Bar(x=s[::2], y=s[1::2], name="student")
 
 layout = go.Layout(barmode='stack', title="available points")
 fig = Figure(data = [class_trace, student_trace], layout = layout)
-py.offline.plot(fig)
+py.offline.plot(fig, filename="../html/plot.html", auto_open=False)
+print(fig)
 
