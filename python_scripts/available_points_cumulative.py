@@ -1,5 +1,6 @@
 import sys
 import plotly as py
+import plotly.io as pio
 from plotly.graph_objs import *
 import plotly.graph_objs as go
 from sklearn import linear_model
@@ -105,8 +106,9 @@ class_trace = go.Bar(x=c[::2], y=c[1::2], name="class")
 student_trace = go.Bar(x=s[::2], y=s[1::2], name="student")
 
 
-layout = go.Layout(barmode='stack', title="available points")
+layout = go.Layout(barmode='group')#, title="available points")
 fig = Figure(data = [class_trace, student_trace], layout = layout)
-py.offline.plot(fig, filename="../html/plot.html", auto_open=False)
+# py.offline.plot(fig, filename="../html/plot.html", auto_open=False)
+pio.write_image(fig, 'plotly.png')
 print(fig)
 

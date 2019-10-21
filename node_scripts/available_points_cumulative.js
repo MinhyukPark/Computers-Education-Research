@@ -61,8 +61,8 @@ async function main() {
         components_arr = await get_components_arr()
         drop_date_arr = await common.get_drop_date_arr() 
         prune_people_arr = await common.get_prune_people_arr(drop_date_arr, inactive_people_arr)
-        // available_points_arr = await get_available_points_arr(active_people_arr, components_arr) 
-        available_points = await get_available_points_arr(prune_people_arr, components_arr, drop_date_arr) 
+        available_points_arr = await get_available_points_arr(active_people_arr, components_arr) 
+        // available_points = await get_available_points_arr(prune_people_arr, components_arr, drop_date_arr) 
 
         cache.set("active_people_arr", active_people_arr)
         cache.set("inactive_people_arr", inactive_people_arr)
@@ -88,6 +88,7 @@ async function main() {
     //common.assert.exists(change_arr, "change_arr")
     
     //components_arr = await get_components_arr()
+    prune_people_arr = active_people_arr
     available_points_arr = await get_available_points_arr(prune_people_arr, components_arr, drop_date_arr) 
     output_available_points_arr(available_points_arr);
     // console.log("active_people_arr count " + Object.keys(active_people_arr).length)
@@ -166,7 +167,7 @@ async function get_available_points_arr(people_arr, components_arr, drop_date_ar
 
     // class
     for (current of current_arr) {
-        if(new Date(drop_date_arr[current_student]["state"]["updated"]) < new Date(current["timestamp"])) {
+        // if(new Date(drop_date_arr[current_student]["state"]["updated"]) < new Date(current["timestamp"])) {
             for (component of Object.keys(components_arr)) {
                 if(!(component in current) || current[component]["totals"]["noDrops"] == undefined) {
                     continue
@@ -184,8 +185,8 @@ async function get_available_points_arr(people_arr, components_arr, drop_date_ar
                 available_points_arr["class"][component] = current_percentage_earned 
             }
             available_points_arr["timestamp"] = current["timestamp"]
-            break;
-        }
+            // break;
+        // }
     }
 
     // students
@@ -198,7 +199,7 @@ async function get_available_points_arr(people_arr, components_arr, drop_date_ar
     var current_count_change = 0
 
     for (current of current_arr) {
-        if(new Date(drop_date_arr[current_student]["state"]["updated"]) < new Date(current["timestamp"])) {
+        // if(new Date(drop_date_arr[current_student]["state"]["updated"]) < new Date(current["timestamp"])) {
             for (component of Object.keys(components_arr)) {
                 var current_percentage_earned = 0
                 if(!(component in current) || current[component]["totals"]["noDrops"] == undefined) {
@@ -219,8 +220,8 @@ async function get_available_points_arr(people_arr, components_arr, drop_date_ar
                 }
                 available_points_arr["students"][current_student][component] = current_percentage_earned;
             }
-            break
-        }
+            // break
+        // }
     }
     db.close()
     return available_points_arr

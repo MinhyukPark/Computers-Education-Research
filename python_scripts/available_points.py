@@ -78,6 +78,7 @@ with open(sys.argv[1], 'r') as f:
         line = f.readline()
         line_no += 1 
 
+''' matplotlib and other things
 fig, ax = plt.subplots()
 
 ## print separate components here
@@ -89,6 +90,7 @@ color_dict = {'MPs': '#ffa659',
               'labs': '#8eff90',
               'exams': '#28acff',
                'class': '#1c0623'}
+
 
 ax.plot(t, c, color=color_dict['class'])
 for i in range(len(s)):
@@ -132,6 +134,7 @@ ax.grid(True)
 
 # ax.legend(["class", cur_student], loc="upper left")
 
+'''
 # regression stuff
 def getBestRegressionScore(cur_num_line, t, s):
     if(cur_num_line == 1):
@@ -201,7 +204,8 @@ while(result):
         break
 
 if(cur_split_index != -1):
-    ax.plot(t[cur_split_index + 2:len(s)], s[cur_split_index + 2:], color='red', linewidth=2)
+    # matplotlib stuff
+    # ax.plot(t[cur_split_index + 2:len(s)], s[cur_split_index + 2:], color='red', linewidth=2)
     print(t[cur_split_index + 2]),
     print("    "),
     print(t[len(s) - 1])
@@ -239,7 +243,7 @@ else:
 
 
 #py.plot_mpl(ax, filename="plotly from matplotlib")
-plt.show()
+# plt.show()
 
 
 

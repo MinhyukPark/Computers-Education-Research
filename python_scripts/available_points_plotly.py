@@ -2,6 +2,7 @@ import sys
 import matplotlib.pyplot as plt
 import plotly as py
 from plotly.graph_objs import *
+import plotly.io as pio
 import plotly.graph_objs as go
 from sklearn import linear_model
 from datetime import datetime
@@ -88,7 +89,7 @@ with open(sys.argv[1], 'r') as f:
         line = f.readline()
         line_no += 1 
 
-fig, ax = plt.subplots()
+# fig, ax = plt.subplots()
 
 ## print separate components here
 color_dict = {'MPs': '#ffa659',
@@ -100,10 +101,21 @@ color_dict = {'MPs': '#ffa659',
               'exams': '#28acff',
                'class': '#1c0623',
                'post_drop': 'rgb(255,0,0)'}
-ax.plot(t, c, color = color_dict['class'])
-class_data = go.Scatter(x=t, y=c, name = "class", line = dict(color=color_dict['class'], width = 2))
+bool_label_dict = {'MPs': True,
+              'lectures': True,
+              'extra': True,
+              'homework': True,
+              'quizzes': True,
+              'labs': True,
+              'exams': True,
+               'class': True,
+               'post_drop': True}
+
+# ax.plot(t, c, color = color_dict['class'])
+class_data = go.Scatter(x=t, y=c, name = "class", line = dict(color=color_dict['class'], width = 2), legendgroup='class')
 #plotly_fig.append_trace(class_data, 1, 1)
-plotly_data.append(class_data)
+# MARK: class
+# plotly_data.append(class_data)
 
 student_data = {}
 for key in color_dict:
@@ -112,32 +124,81 @@ for key in color_dict:
 
 plot_row_counter = 2
 counter = 0
-for i in range(len(s)):
-    start = i
-    end = -1
-    start_label = change[start]
-    for j in range(start, len(s)):
-        if(start_label == '0'):
-            if(change[j] != 0):
-                start_label = change[j]
-        elif(start_label == change[j]):
-            pass
-        else:
-            end = j
-            i = j
-            j = len(s)
-    if(start_label == '0' and i == (len(s) - 1) or end == -1):
+
+for i in range(1, len(s) - 1):
+    current_label = change[i]
+    j = i + 1
+    while(current_label == '0'):
+        if(j == len(s) - 1):
+            break
+        current_label = change[j]
+        j += 1
+
+    start = i - 1
+    end = i + 1
+    if(current_label == '0'):
         print("ah")
+        continue
+    
+    if(bool_label_dict[current_label]):
+        cur_data = go.Scatter(x=t[start:end], y=s[start:end], name=current_label, mode = 'lines', line = dict(color=color_dict[current_label], width = 2), legendgroup=current_label)
+        bool_label_dict[current_label] = False
     else:
-        #print((start, end))
-        ax.plot(t[start:end], s[start:end], color=color_dict[start_label]) 
-        student_data[start_label][0].extend(t[start:end])
-        student_data[start_label][1].extend(s[start:end])
-        cur_data = go.Scatter(x=t[start:end], y=s[start:end], name=start_label, line = dict(color=color_dict[start_label], width = 2))
-        #plotly_fig.append_trace(cur_data, plot_row_counter, 1)
-        plotly_data.append(cur_data)
-        plot_row_counter += 1
-        counter += 1
+        cur_data = go.Scatter(x=t[start:end], y=s[start:end], name=current_label, mode = 'lines', line = dict(color=color_dict[current_label], width = 2), legendgroup=current_label, showlegend = False)
+    plotly_data.append(cur_data)
+
+
+
+
+# MARK: plotly
+# i = 0
+# start_label = change[i]
+# while(start_label == '0'):
+#     start_label = change[i]
+#     i += 1
+# plotly_data.append(go.Scatter(x=t[0:i], y=s[0:i], name=start_label, mode='lines', line=dict(color=color_dict[start_label], width=2), legendgroup=start_label, showlegend=False))
+# while i < len(s):
+#     start = i
+#     end = -1
+#     start_label = change[start]
+#     j = start + 1
+#     while j < len(s):
+#         if(start_label == '0'):
+#             if(change[j] != '0'):
+#                 start_label = change[j]
+#         if(start_label == change[j]):
+#             pass
+#         elif(j < len(s) and change[j] == '0'):
+#             pass
+#         else:
+#             end = j
+#             j = i - 1
+#             j = len(s)
+#         j += 1
+#     # if(start_label == '0' and i == (len(s) - 1) or end == -1):
+#     if(end == -1):
+#         print("ah")
+#     else:
+#         print("label: " + start_label + " " + repr(start) + ", " +  repr(end))
+#         print(repr((t[start], t[end - 1])) + " " + repr((s[start], s[end - 1])))
+#         # ax.plot(t[start:end], s[start:end], color=color_dict[start_label]) 
+#         if(end >= len(s)):
+#             end = len(s) - 1
+
+#         student_data[start_label][0].extend(t[start:end])
+#         student_data[start_label][1].extend(s[start:end])
+#         # MARK: uncomment
+#         cur_data = None
+#         if(bool_label_dict[start_label]):
+#             cur_data = go.Scatter(x=t[start:end], y=s[start:end], name=start_label, mode = 'lines', line = dict(color=color_dict[start_label], width = 2), legendgroup=start_label)
+#             bool_label_dict[start_label] = False
+#         else:
+#             cur_data = go.Scatter(x=t[start:end], y=s[start:end], name=start_label, mode = 'lines', line = dict(color=color_dict[start_label], width = 2), legendgroup=start_label, showlegend = False)
+#         # plotly_fig.append_trace(cur_data, plot_row_counter, 1)
+#         plotly_data.append(cur_data)
+#         plot_row_counter += 1
+#         counter += 1
+#     i += 1
 print(counter)
 '''
 for key in student_data:
@@ -156,16 +217,16 @@ labs_patch = mpatches.Patch(color=color_dict['labs'], label='labs')
 exams_patch = mpatches.Patch(color=color_dict['exams'], label='exams')
 MPs_patch = mpatches.Patch(color=color_dict['MPs'], label='MPs')
 class_patch = mpatches.Patch(color=color_dict['class'], label='class total available points')
-ax.legend(loc="upper left", handles=[lecture_patch, extra_patch, homework_patch, quizzes_patch, labs_patch, exams_patch, MPs_patch, class_patch])
+# ax.legend(loc="upper left", handles=[lecture_patch, extra_patch, homework_patch, quizzes_patch, labs_patch, exams_patch, MPs_patch, class_patch])
 # format the ticks
-ax.xaxis.set_major_locator(months)
-ax.xaxis.set_major_formatter(monthsFmt)
-ax.xaxis.set_minor_locator(plt.MaxNLocator(10))
+# ax.xaxis.set_major_locator(months)
+# ax.xaxis.set_major_formatter(monthsFmt)
+# ax.xaxis.set_minor_locator(plt.MaxNLocator(10))
 # ax.xaxis.set_minor_locator(days)
-ax.xaxis.set_minor_formatter(daysFmt)
+# ax.xaxis.set_minor_formatter(daysFmt)
 
-ax.format_xdata = mdates.DateFormatter('%Y-%m-%d')
-ax.grid(True)
+# ax.format_xdata = mdates.DateFormatter('%Y-%m-%d')
+# ax.grid(True)
 
 # ax.legend(["class", cur_student], loc="upper left")
 
@@ -238,10 +299,11 @@ while(result):
         break
 
 if(cur_split_index != -1):
-    ax.plot(t[cur_split_index + 2:len(s)], s[cur_split_index + 2:], color='red', linewidth=2)
-    post_drop_data = go.Scatter(x=t[cur_split_index + 2:len(s)], y=s[cur_split_index + 2:], name='post_drop', line = dict(color=color_dict['post_drop'], width = 2))
-    #plotly_fig.append_trace(post_drop_data, NROW, 1)
-    plotly_data.append(post_drop_data)
+    # ax.plot(t[cur_split_index + 2:len(s)], s[cur_split_index + 2:], color='red', linewidth=2)
+    post_drop_data = go.Scatter(x=t[cur_split_index + 2:len(s)], y=s[cur_split_index + 2:], name='post_drop', mode = 'lines', line = dict(color=color_dict['post_drop'], width = 2), legendgroup='post_drop')
+    # plotly_fig.append_trace(post_drop_data, NROW, 1)
+    # MARK: uncomment
+    # plotly_data.append(post_drop_data)
     print(t[cur_split_index + 2]),
     print("    "),
     print(t[len(s) - 1])
@@ -281,8 +343,9 @@ else:
 #py.plot_mpl(ax, filename="plotly from matplotlib")
 #plotly_fig['layout'].update(height=800, width=800, title='available points')
 #py.offline.plot(plotly_fig)
-layout = {"title": "available points"}
-fig = Figure(data = Data(plotly_data), layout = layout)
-py.offline.plot(fig)
-plt.show()
+# layout = {"title": "available points"}
+fig = Figure(data = Data(plotly_data))# , layout = layout)
+py.offline.plot(fig, filename='plotly.html', auto_open=False)
+pio.write_image(fig, 'plotly.png')
+# plt.show()
 

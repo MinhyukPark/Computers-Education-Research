@@ -53,6 +53,7 @@ async function main() {
     var available_poins_arr = null
     var components_arr = null
     var drop_date_arr = null
+    var tuple_points = null
 
     if(CLEAN_RUN) {
         cache = common.get_fresh_store()
@@ -60,9 +61,10 @@ async function main() {
         inactive_people_arr = await common.get_inactive_people_arr()
         components_arr = await get_components_arr()
         drop_date_arr = await common.get_drop_date_arr() 
-        prune_people_arr = await common.get_prune_people_arr(drop_date_arr, inactive_people_arr)
-        // available_points_arr = await get_available_points_arr(active_people_arr, components_arr) 
-        tuple_points = await get_available_points_arr(prune_people_arr, components_arr, drop_date_arr) 
+        // prune_people_arr = await common.get_prune_people_arr(drop_date_arr, inactive_people_arr)
+        prune_people_arr = []
+        // tuple_points = await get_available_points_arr(prune_people_arr, components_arr, drop_date_arr) 
+        tuple_points = await get_available_points_arr(active_people_arr, components_arr, drop_date_arr) 
         available_points_arr = tuple_points[0]
         change_arr = tuple_points[1]
 
@@ -82,6 +84,9 @@ async function main() {
         drop_date_arr = cache.get("drop_date_arr")
         available_points_arr = cache.get("available_points_arr")
         change_arr = cache.get("change_arr")
+        tuple_points = []
+        tuple_points[0] = available_poins_arr
+        tuple_points[1] = change_arr
     }
     common.assert.exists(active_people_arr, "active_people_arr assert")
     common.assert.exists(inactive_people_arr, "inactive_people_arr assert")
@@ -92,7 +97,7 @@ async function main() {
     //common.assert.exists(change_arr, "change_arr")
     
     //components_arr = await get_components_arr()
-    //tuple_points = await get_available_points_arr(prune_people_arr, components_arr, drop_date_arr) 
+    // tuple_points = await get_available_points_arr(prune_people_arr, components_arr, drop_date_arr) 
     output_available_points_arr(tuple_points[0], tuple_points[1])
     // console.log("active_people_arr count " + Object.keys(active_people_arr).length)
     // console.log("done")
@@ -147,7 +152,8 @@ async function get_available_points_arr(people_arr, components_arr, drop_date_ar
     available_points_arr["students"][current_student] = []
 
     var bestChanges_query = {
-        email: current_student
+        email: current_student,
+        "semester": common.constants.CURRENT_SEMESTER
     }
 
     var bestChanges_project = {}
@@ -175,12 +181,12 @@ async function get_available_points_arr(people_arr, components_arr, drop_date_ar
     // class
     for (current of current_arr) {
         /* DEBUG TRUNCATION */
-        if(current_mod_count % truncated_mod == 0) {
-            current_mod_count += 1
-        } else {
-            current_mod_count += 1
-            continue
-        }
+        // if(current_mod_count % truncated_mod == 0) {
+        //     current_mod_count += 1
+        // } else {
+        //     current_mod_count += 1
+        //     continue
+        // }
         /* DEBUG TRUNCATION END */
         var current_percentage_earned = 0
         for (component of Object.keys(components_arr)) {
@@ -211,18 +217,20 @@ async function get_available_points_arr(people_arr, components_arr, drop_date_ar
     var current_count_change = 0
 
     for (current of current_arr) {
-        if(new Date(drop_date_arr[current_student]["state"]["updated"]) < new Date(current["timestamp"])) {
-            break
-        }
+        // MARK: inactive students
+        //if(new Date(drop_date_arr[current_student]["state"]["updated"]) < new Date(current["timestamp"])) {
+        //    break
+        //}
         /* DEBUG TRUNCATION */
-        if(current_mod_count % truncated_mod == 0) {
-            current_mod_count += 1
-        } else {
-            current_mod_count += 1
-            continue
-        }
+        // if(current_mod_count % truncated_mod == 0) {
+        //     current_mod_count += 1
+        // } else {
+        //     current_mod_count += 1
+        //     continue
+        // }
         /* DEBUG TRUNCATION END */
         var current_percentage_earned = 0
+        var current_component_change_arr = {}
         for (component of Object.keys(components_arr)) {
             if(!(component in current) || current[component]["totals"]["noDrops"] == undefined) {
                 continue
@@ -236,13 +244,30 @@ async function get_available_points_arr(people_arr, components_arr, drop_date_ar
             current_component_curved = current_component_scaled * current_component_curve
 
             current_percentage_earned += current_component_curved
-            if(previous_component_arr[component] < current_component_curved) {
-                previous_component_arr[component] = current_component_curved
-                change_arr[current_count_change] = component
-            }
+
+            current_component_change_arr[component] = current_component_curved
         }
+        var max_difference = 0.0
+        var max_component = null
+        for(component of Object.keys(current_component_change_arr)) {
+            // console.log("component " + component + " with a value of " + current_component_change_arr[component])
+            if(max_difference < current_component_change_arr[component] - previous_component_arr[component]) {
+                max_difference = current_component_change_arr[component] - previous_component_arr[component]
+                max_component = component
+            }
+            previous_component_arr[component] = current_component_change_arr[component]
+        }
+        if(max_component != null) {
+            // console.log("by " + max_component + " with a difference of " + max_difference)
+            change_arr[current_count_change] = max_component
+        }
+        // if(previous_component_arr[component] < current_component_curved) {
+        //     previous_component_arr[component] = current_component_curved
+            // change_arr[current_count_change] = component
+        // }
         available_points_arr["students"][current_student].push(current_percentage_earned)  
         current_count_change += 1
+        // console.log("---")
     }
     db.close()
     return [available_points_arr, change_arr]
